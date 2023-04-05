@@ -1,0 +1,671 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Interactive Real-time Smoke Simulation with Modifiable Parameters, Object Collisions, and Attractors</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="57d92c90-3042-412d-a099-ceb77d4f42ce" class="page sans"><header><img class="page-cover-image" src="Interactive%20Real-time%20Smoke%20Simulation%20with%20Modifi%2057d92c903042412da099ceb77d4f42ce/raphael-baker-smoke-flame-8.jpg" style="object-position:center 50%"/><h1 class="page-title">Interactive Real-time Smoke Simulation with Modifiable Parameters, Object Collisions, and Attractors</h1></header><div class="page-body"><p id="e129fa32-56fd-402a-95eb-b2c65de4a85e" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Alexander Liang, Christina Neumann, Yi Mu, Yueheng Zhang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p><nav id="269ba92e-7b64-41a8-9c4f-02dd4c41a01b" class="block-color-gray table_of_contents"><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#cf2341c3-d99b-4ef4-993c-79eb20910a2e">Problem Description</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#d820540b-846f-4268-a208-49f7b66dcc88">Goals and Deliverables</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#4b97e99d-b2ec-4f6b-aeb2-8f95cd671841">Goals</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#1c27b02a-a1a5-4bea-a9e1-1f3504dc213d">Inspirations</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#612f1f2d-fc50-4095-b7a7-55042486cfe9">Deliverables</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a9bbe919-6bd6-422f-8d12-6fa6ec596f7b">Stretch Goals</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#ad0caefe-5ac3-4301-a3e4-74a275bc2e38">Schedule</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#e3f238e1-1d16-46f7-a0ba-bac9fed0914b">Week 1</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#abf2f00a-751e-4335-a576-f6fc2873e356">Week 2</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#6b5f17c5-1f37-4769-90f1-54337e7ee6a0">Week 3</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#40db5661-79c6-4719-bdbb-eaaf2b7627f6">Week 4</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#24227c67-61a2-4560-82b2-f93f28ff2b3f">Resources / References</a></div></nav><h1 id="cf2341c3-d99b-4ef4-993c-79eb20910a2e" class="">Problem Description</h1><p id="6ac952b7-b59d-4299-a705-e8854fff3ad8" class="">We would like to develop a real-time, 2D smoke simulator that allows the user to create objects to produce visually appealing smoke. This will be done by allowing the user to create objects or points that can create, repel, or attract smoke. This problem will be challenging because there are a lot of variables to account for with multiple user-placed objects, and smoke simulation can be computationally demanding. </p><h1 id="d820540b-846f-4268-a208-49f7b66dcc88" class="">Goals and Deliverables</h1><h2 id="4b97e99d-b2ec-4f6b-aeb2-8f95cd671841" class="">Goals</h2><p id="b5d99f6a-63be-4b21-9cdb-a095d76d435c" class="">We hope to deliver the following:</p><ul id="b1b6d36d-1013-4d48-9c89-714a81bd5241" class="bulleted-list"><li style="list-style-type:disc">Develop an interactive real-time smoke simulation with modifiable parameters and object collisions.</li></ul><ul id="ec750e34-33b2-4519-95ba-fe702ff41147" class="bulleted-list"><li style="list-style-type:disc">Implement adjustable parameters, including gravity, pressure, density, and divergence, that directly affect the simulation.</li></ul><ul id="e0d9d524-5399-481e-b814-d6455b4ed898" class="bulleted-list"><li style="list-style-type:disc">Incorporate object collisions with both simple and complex surfaces, such as objects/points that can emit directional or omni-directional force and can produce or attract smoke, allowing for drag-and-drop functionality to produce visually appealing smoke swirls.</li></ul><ul id="46ccecdb-188d-4f6d-ac35-b129abd19682" class="bulleted-list"><li style="list-style-type:disc">Validate that our smoke simulation performs correctly by comparing it to real-world videos.</li></ul><ul id="cdf6f42b-ee7a-4f3b-9fc9-7fbff4ea9a14" class="bulleted-list"><li style="list-style-type:disc">Perform within an expected level of responsiveness and reasonable frame rates</li></ul><h2 id="1c27b02a-a1a5-4bea-a9e1-1f3504dc213d" class="">Inspirations</h2><figure id="a12b2a32-593a-445a-81af-38a602f5ab97" class="image"><a href="Interactive%20Real-time%20Smoke%20Simulation%20with%20Modifi%2057d92c903042412da099ceb77d4f42ce/Untitled.png"><img src="Interactive%20Real-time%20Smoke%20Simulation%20with%20Modifi%2057d92c903042412da099ceb77d4f42ce/Untitled.png"/></a></figure><figure id="c03747d5-1413-46dd-8c1b-00886ffd1d8e"><div class="source"><a href="https://youtu.be/Yesl6DMAnD0">https://youtu.be/Yesl6DMAnD0</a></div></figure><figure id="d28ce3b7-7798-42a1-b320-77a8d2e61b09"><div class="source"><a href="https://www.youtube.com/watch?v=idpOunnpKTo&amp;ab_channel=OrfeasLiossatos">https://www.youtube.com/watch?v=idpOunnpKTo&amp;ab_channel=OrfeasLiossatos</a></div></figure><p id="a5354e69-ba3d-4cdd-9ba1-5b0608cbb57e" class="">We would like to achieve the effects shown above but in 2D and in real-time. </p><h2 id="612f1f2d-fc50-4095-b7a7-55042486cfe9" class="">Deliverables</h2><p id="f1455743-1d4d-40c2-b958-7507f179c57f" class="">Upon the completion of this project, the following deliverables are expected:</p><ul id="eef3603e-e578-4c5d-977f-11d5084ea024" class="bulleted-list"><li style="list-style-type:disc">A functional, real-time smoke simulation program with adjustable parameters.</li></ul><ul id="fb1f0cb7-e1f5-4adf-866b-bff1805eb56f" class="bulleted-list"><li style="list-style-type:disc">A graphical user interface for modifying simulation parameters and interacting with the environment.</li></ul><ul id="e103e2a4-317d-46e1-8dfb-c03651baaf41" class="bulleted-list"><li style="list-style-type:disc">A final project report summarizing the goals, methods, results, and conclusions.</li></ul><h2 id="a9bbe919-6bd6-422f-8d12-6fa6ec596f7b" class="">Stretch Goals</h2><p id="4c41d748-ff25-47d1-9c17-a694b3c9ccd7" class="">These are the goals that we hope to accomplish, if time permits. </p><ul id="a600d2bd-9e66-4cef-a7cc-adb8395fdc7e" class="bulleted-list"><li style="list-style-type:disc">Multiple smoke generators/attractors, multiple objects</li></ul><ul id="2034cc5d-5978-4353-bc37-053198e7a3a0" class="bulleted-list"><li style="list-style-type:disc">Draggable objects that interact with static smoke generators</li></ul><ul id="c5c4a7e7-c075-4843-b50f-ce61074687e5" class="bulleted-list"><li style="list-style-type:disc">Arbitrary object creation (drawing on the interface) and interaction with static smoke generators</li></ul><h1 id="ad0caefe-5ac3-4301-a3e4-74a275bc2e38" class="">Schedule</h1><h3 id="e3f238e1-1d16-46f7-a0ba-bac9fed0914b" class="">Week 1</h3><ul id="99d38f4d-2181-4c85-9d13-adce898673a0" class="bulleted-list"><li style="list-style-type:disc">Conduct research on smoke simulation algorithms and techniques.</li></ul><ul id="24f211d6-e295-4894-b96a-02a8652c0bce" class="bulleted-list"><li style="list-style-type:disc">Develop a basic understanding of the physics behind smoke behavior.</li></ul><ul id="6d397f7d-f63d-459b-acdb-9e93cccd9b8c" class="bulleted-list"><li style="list-style-type:disc">Set up the development environment and required libraries.</li></ul><ul id="41ced0d1-d65d-4f53-a447-bea4a56d8c18" class="bulleted-list"><li style="list-style-type:disc">Begin implementing a basic smoke simulation prototype.</li></ul><h3 id="abf2f00a-751e-4335-a576-f6fc2873e356" class="">Week 2</h3><ul id="d85e5447-4f32-484f-86de-c09575084442" class="bulleted-list"><li style="list-style-type:disc">Add adjustable parameters, such as gravity, pressure, density, and divergence, to the simulation.</li></ul><ul id="98652670-193b-4c28-b010-293046cc50f7" class="bulleted-list"><li style="list-style-type:disc">Implement object collision functionality for simple surfaces (planes).</li></ul><ul id="8e77654b-fa85-47b3-9b5d-00e9f732c68b" class="bulleted-list"><li style="list-style-type:disc">Begin implementing more complex object functionality like smoke attraction, smoke production, and force emission.</li></ul><h3 id="6b5f17c5-1f37-4769-90f1-54337e7ee6a0" class="">Week 3</h3><ul id="ce5c5ebf-5a16-4623-9c87-569115d2e339" class="bulleted-list"><li style="list-style-type:disc">Complete implementation of complex object collision functionality.</li></ul><ul id="c4072f77-4e33-45c9-840b-0d68ee490fd8" class="bulleted-list"><li style="list-style-type:disc">Add drag-and-drop functionality to the objects in the environment.</li></ul><ul id="3d586d11-f77a-40d4-9b0a-363c717058c8" class="bulleted-list"><li style="list-style-type:disc">Begin designing the graphical user interface.</li></ul><h3 id="40db5661-79c6-4719-bdbb-eaaf2b7627f6" class="">Week 4</h3><ul id="16627d98-261f-4c7b-bb88-2a4abb255ada" class="bulleted-list"><li style="list-style-type:disc">Finalize the graphical user interface.</li></ul><ul id="4db19a68-466d-4878-b66d-1bb808c7a5ce" class="bulleted-list"><li style="list-style-type:disc">Conduct thorough testing and debugging of the simulation.</li></ul><ul id="ac218047-b797-43a1-a54e-d87f1fc01387" class="bulleted-list"><li style="list-style-type:disc">Prepare the final project report and the presentation slides.</li></ul><p id="1f466411-0fd0-405b-8350-b1b1480d13a2" class="">
+</p><h1 id="24227c67-61a2-4560-82b2-f93f28ff2b3f" class="">Resources / References</h1><p id="d2d2e309-ea78-44ad-8e85-34754a0b2d08" class="">Key resources and references for this project include:</p><ol type="1" id="b016c641-15b1-4af2-b1fc-242c4508531a" class="numbered-list" start="1"><li><a href="https://github.com/mharrys/fluids-2d">https://github.com/mharrys/fluids-2d</a></li></ol><ol type="1" id="8985c76b-7730-4a03-88ad-e1c3273ab6a6" class="numbered-list" start="2"><li><a href="https://gamedevelopment.tutsplus.com/tutorials/how-to-write-a-smoke-shader--cms-25587">https://gamedevelopment.tutsplus.com/tutorials/how-to-write-a-smoke-shader--cms-25587</a></li></ol><ol type="1" id="475d2b6c-4663-40b7-ae8c-eb0b3fc24fd3" class="numbered-list" start="3"><li>Bridson, R., Müller-Fischer, M., &amp; Fedkiw, R. (2007). Fluid simulation: Siggraph 2007 course notes. ACM SIGGRAPH.</li></ol><ol type="1" id="d6b04572-15a5-431e-8198-30576609e1a3" class="numbered-list" start="4"><li>Foster, N., &amp; Metaxas, D. (1996). Realistic animation of liquids. Graphical Models and Image Processing, 58(5), 471-483.</li></ol><ol type="1" id="88450203-f149-43c7-ab07-e49518c599ae" class="numbered-list" start="5"><li>Harris, M. J. (2003). Real-time cloud simulation and rendering. Ph.D. Thesis, University of North Carolina at Chapel Hill.</li></ol><ol type="1" id="a9f4fd87-bb34-417f-974b-029d979b3d69" class="numbered-list" start="6"><li>Stam, J. (1999). Stable fluids. Proceedings of the 26th Annual Conference on Computer Graphics and Interactive Techniques, 121-128.</li></ol><p id="ee3bb5c5-01e5-40c0-9654-dd3c95231ce3" class="">
+</p></div></article></body></html>
