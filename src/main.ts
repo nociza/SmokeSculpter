@@ -1,3 +1,9 @@
-import { init, renderScene } from "./scene";
+import { initScene, renderScene, handleKeyPress } from "./scene";
 
-renderScene(init());
+const sceneData = initScene();
+renderScene(sceneData);
+
+// Add an event listener for keypress events
+window.addEventListener("keypress", (event) => {
+  handleKeyPress(sceneData, event);
+});
