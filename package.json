@@ -8,9 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && node ./dist/index.js",
-    "build": "rimraf ./dist && tsc",
-    "dev": "npx ts-node-dev --respawn --transpile-only ./src/index.ts"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -26,14 +26,15 @@
   },
   "homepage": "https://github.com/nociza/SmokeSculpter#readme",
   "dependencies": {
-    "dat-gui": "^0.5.0",
+    "dat.gui": "^0.7.9",
     "three": "^0.151.3"
   },
   "devDependencies": {
-    "@types/dat-gui": "^0.6.3",
+    "@types/dat.gui": "^0.7.9",
     "@types/three": "^0.150.1",
-    "typescript": "^5.0.4",
     "nodemon": "^2.0.16",
-    "ts-node-dev": "^2.0.0"
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4",
+    "vite": "^4.2.2"
   }
 }
