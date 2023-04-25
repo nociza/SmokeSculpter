@@ -28,6 +28,12 @@ function createWalls(): THREE.Mesh[] {
   return [wall1, wall2, wall3];
 }
 
+function createGrid(): THREE.GridHelper {
+  const grid = new THREE.GridHelper(100, 40, 0xdddddd, 0xdddddd);
+  grid.position.set(0, -5.5, 0);
+  return grid;
+}
+
 export function initScene(): SceneData {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
@@ -41,12 +47,18 @@ export function initScene(): SceneData {
   document.body.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
+  controls.minDistance = 10;
+  controls.maxDistance = 60;
   controls.target.set(0, 0, 0);
   camera.position.set(5, 5, 5);
   controls.update();
 
   const walls = createWalls();
   walls.forEach((wall) => scene.add(wall));
+
+  //add a mesh grid to the bottom
+  const grid_floor = createGrid();
+  scene.add(grid_floor)
 
   // Add spot lights to the scene
   const spotLight = new THREE.SpotLight(0xffffff, 0.5);
@@ -57,7 +69,7 @@ export function initScene(): SceneData {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  const gui = setupGUI(walls, spotLight);
+  const gui = setupGUI(walls, spotLight, grid_floor);
 
   return { scene, camera, renderer, controls, walls, gui };
 }
@@ -79,7 +91,7 @@ export function renderScene({
   animate();
 }
 
-function setupGUI(walls: THREE.Mesh[], spotLight: THREE.SpotLight): GUI {
+function setupGUI(walls: THREE.Mesh[], spotLight: THREE.SpotLight, grid: THREE.GridHelper): GUI {
   const gui = new GUI();
 
   // Wall color picker (the label should say "Wall color")
@@ -108,6 +120,9 @@ function setupGUI(walls: THREE.Mesh[], spotLight: THREE.SpotLight): GUI {
   gui.add(spotLight.position, "x", -10, 10);
   gui.add(spotLight.position, "y", -10, 10);
   gui.add(spotLight.position, "z", -10, 10);
+
+  //toggle grid visibility
+  gui.add(grid, "visible");
 
   return gui;
 }
