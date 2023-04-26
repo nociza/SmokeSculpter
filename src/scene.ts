@@ -9,6 +9,7 @@ interface SceneData {
   controls: OrbitControls;
   walls: THREE.Mesh[];
   gui: GUI;
+  objects: THREE.Mesh[];
 }
 
 function createWalls(): THREE.Mesh[] {
@@ -53,6 +54,8 @@ export function initScene(): SceneData {
   camera.position.set(5, 5, 5);
   controls.update();
 
+  const objects = [];
+
   const walls = createWalls();
   walls.forEach((wall) => scene.add(wall));
 
@@ -69,9 +72,10 @@ export function initScene(): SceneData {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
+
   const gui = setupGUI(walls, spotLight, grid_floor);
 
-  return { scene, camera, renderer, controls, walls, gui };
+  return { scene, camera, renderer, controls, walls, gui, objects };
 }
 
 export function renderScene({
@@ -89,6 +93,31 @@ export function renderScene({
   };
 
   animate();
+}
+
+function addNewObject(sceneDat: SceneData, mouseposition: any, event: KeyboardEvent): void {
+  //https://stackoverflow.com/questions/47682260/three-js-draw-where-mouse-clicks-but-entirely-parallel-to-camera-orientation
+  //something might be off
+  console.log(mouseposition);
+  const scene = sceneDat.scene;
+  const camera = sceneDat.camera;
+  var raycaster = new THREE.Raycaster();
+  var plane = new THREE.Plane();
+  var planeNormal = new THREE.Vector3();
+  var point = new THREE.Vector3();
+  var mouse = new THREE.Vector2(mouseposition.x, mouseposition.y);
+  planeNormal.copy(camera.position).normalize();
+  plane.setFromNormalAndCoplanarPoint(planeNormal, scene.position);
+  raycaster.setFromCamera(mouse, camera);
+  raycaster.ray.intersectPlane(plane, point);
+
+  const geometry = new THREE.BoxGeometry(2, 2, 2);
+  const material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+  const cube = new THREE.Mesh(geometry, material);
+
+  cube.position.copy(point);
+  sceneDat.objects.push(cube);
+  scene.add(cube);
 }
 
 function setupGUI(walls: THREE.Mesh[], spotLight: THREE.SpotLight, grid: THREE.GridHelper): GUI {
@@ -133,11 +162,17 @@ function resetCamera(camera: THREE.PerspectiveCamera) {
 }
 
 export function handleKeyPress(
-  { camera }: SceneData,
+  sceneData: SceneData,
+  mouseposition: any,
   event: KeyboardEvent
 ): void {
-  if (event.code === "Space") {
+  let camera = sceneData.camera;
+  console.log(event);
+  if (event?.code === "Space") {
     resetCamera(camera);
+  }
+  if (event?.code === "KeyN") {
+    addNewObject(sceneData, mouseposition, event);
   }
 }
 
