@@ -20,7 +20,8 @@
     "jest"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/index.html",
   ],
   "exclude": [
     "node_modules"
