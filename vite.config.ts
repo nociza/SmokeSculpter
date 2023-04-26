@@ -5,7 +5,7 @@ export default defineConfig({
   base: '',
   build: {
     emptyOutDir: true,
-    outDir: "../docs/dist",
+    outDir: "../docs/demo",
   },
   server: {
     host: "localhost",
