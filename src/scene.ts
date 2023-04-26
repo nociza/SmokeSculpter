@@ -22,12 +22,7 @@ export class SmokeSimulation {
     document.body.appendChild(this.renderer.domElement);
     this.spotLight = new THREE.SpotLight(0xffffff, 0.5);
     this.initGUI();
-
-    this.createParticles();
     this.animate();
-
-    //window.addEventListener('resize', this.onWindowResize.bind(this), false);
-    //window.addEventListener('click', this.onMouseClick.bind(this), false);
 
     window.addEventListener("click", (event) => {
       this.onMouseClick(event);
@@ -85,7 +80,6 @@ export class SmokeSimulation {
     const material = new THREE.ShaderMaterial({
       uniforms: {
         color: { value: new THREE.Color(0xffffff) },
-        texture: { value: null }
       },
       vertexShader: `
                 attribute float size;
@@ -128,9 +122,6 @@ export class SmokeSimulation {
     this.particles.position.copy(pos);
   }
 
-
-
-
   private createGrid(): void {
     this.grid = new THREE.GridHelper(100, 40, 0xdddddd, 0xdddddd);
     this.grid.position.set(0, -5.5, 0);
@@ -154,8 +145,7 @@ export class SmokeSimulation {
     this.walls = [wall1, wall2, wall3];
   }
 
-
-
+  /* initialize the GUI */
   private initGUI(): void {
     this.gui = new dat.GUI();
     this.guiData = {
@@ -163,6 +153,7 @@ export class SmokeSimulation {
       size: 0.1
     };
 
+    // Wall color picker
     const wallColors = "rgb(128, 128, 128)";
     this.gui
       .addColor(new THREE.Color(wallColors), "r")
@@ -174,6 +165,7 @@ export class SmokeSimulation {
         });
       })
       .name("Wall Color");
+
 
     // Spot light color picker
     const spotLightColor = "rgb(255, 255, 255)";
@@ -187,6 +179,7 @@ export class SmokeSimulation {
       })
       .name("Spot Light Color");
 
+
     // change the direction of the light using GUI
     this.gui.add(this.spotLight.position, "x", -10, 10);
     this.gui.add(this.spotLight.position, "y", -10, 10);
@@ -195,6 +188,7 @@ export class SmokeSimulation {
     //toggle grid visibility
     this.gui.add(this.grid, "visible");
 
+    //smoke color picker
     this.gui
       .addColor(this.guiData, 'color')
       .name('Smoke Color')
@@ -202,6 +196,7 @@ export class SmokeSimulation {
         (this.particles.material as THREE.ShaderMaterial).uniforms.color.value.set(color);
       });
 
+    //smoke size slider
     this.gui
       .add(this.guiData, 'size', 0.01, 1.0, 0.01)
       .name('Smoke Size')
@@ -214,8 +209,7 @@ export class SmokeSimulation {
       });
   }
 
-
-
+  /* initialize the scene, walls, grid  */
   private initScene(): void {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -248,9 +242,6 @@ export class SmokeSimulation {
     this.scene.add(ambientLight);
   }
 
-
-
-
   private animate(): void {
     requestAnimationFrame(this.animate.bind(this));
 
@@ -259,9 +250,6 @@ export class SmokeSimulation {
 
     this.renderer.render(this.scene, this.camera);
   }
-
-
-
 
   private updateParticles(): void {
     const positions = this.particles.geometry.attributes.position;
@@ -282,7 +270,6 @@ export class SmokeSimulation {
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
   }
 
-
   private handleKeyPress(
     mouseposition: any,
     event: KeyboardEvent
@@ -294,15 +281,9 @@ export class SmokeSimulation {
     if (event?.code === "KeyN") {
       this.addNewObject(mouseposition, event);
     }
-  }
-
-
-
-
-  private onWindowResize(): void {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    if (event?.code === "KeyR") {
+      this.createParticles();
+    }
   }
 
   /******************************************************************************
