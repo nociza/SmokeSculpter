@@ -98,15 +98,14 @@ export function renderScene({
 function addNewObject(sceneDat: SceneData, mouseposition: any, event: KeyboardEvent): void {
   //https://stackoverflow.com/questions/47682260/three-js-draw-where-mouse-clicks-but-entirely-parallel-to-camera-orientation
   //something might be off
+  console.log(mouseposition);
   const scene = sceneDat.scene;
   const camera = sceneDat.camera;
   var raycaster = new THREE.Raycaster();
   var plane = new THREE.Plane();
   var planeNormal = new THREE.Vector3();
   var point = new THREE.Vector3();
-  var mouse = new THREE.Vector2();
-  mouse.x = mouseposition.x;
-  mouse.y = mouseposition.y;
+  var mouse = new THREE.Vector2(mouseposition.x, mouseposition.y);
   planeNormal.copy(camera.position).normalize();
   plane.setFromNormalAndCoplanarPoint(planeNormal, scene.position);
   raycaster.setFromCamera(mouse, camera);

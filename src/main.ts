@@ -8,8 +8,8 @@ window.addEventListener("keypress", (event) => {
   handleKeyPress(sceneData, mouseposition, event);
 });
 
-//Add an event listener for mousemove events
+// Track mouse position
 window.addEventListener("mousemove", (event) => {
   mouseposition.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouseposition.y = -(event.clientY / window.innerHeight) * 2 - 1;
+  mouseposition.y = -((event.clientY / window.innerHeight) * 2 - 1);
 })
