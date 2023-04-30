@@ -71,9 +71,13 @@ export async function initScene(): Promise<FluidSimData> {
 
   const gui = new GUI();
 
-  // tslint: disable - line;
-  gui.add(grid, "size", 0, 128, 1).onChange(() => {
-    console.log(grid.size);
+  const gridController = {
+    size: grid.size.x,
+  };
+
+  gui.add(gridController, "size", 0, 128, 1).onChange((value) => {
+    console.log(value);
+    grid.size.set(value, value, value);
   });
 
   const shaders = await loadShaders();
@@ -204,6 +208,9 @@ export function updateScene(
   sceneData.renderer.render(sceneData.scene, sceneData.camera);
   sceneData.scene.remove(sceneData.fullscreenQuad);
   swapTextures(sceneData, "velocity");
+
+  sceneData.renderer.setRenderTarget(null);
+  sceneData.renderer.render(sceneData.scene, sceneData.camera);
 }
 
 function swapTextures(sceneData: SceneData, type: string): void {
