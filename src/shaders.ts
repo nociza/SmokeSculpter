@@ -5,6 +5,8 @@ export interface Shaders {
     vertexShader: string;
     fragmentShader: string;
   };
+  smokeVertexShader: string;
+  smokeFragmentShader: string;
 }
 
 export async function loadShaders(): Promise<Shaders> {
@@ -14,14 +16,20 @@ export async function loadShaders(): Promise<Shaders> {
   const fluidSimulationFragmentShader = await loadShaderFile(
     "shaders/fluidSimulation.frag"
   );
-
-  console.log(fluidSimulationVertexShader);
+  const smokeVertexShader = await loadShaderFile(
+    "shaders/smokeVertexShader.vert"
+  );
+  const smokeFragmentShader = await loadShaderFile(
+    "shaders/smokeFragmentShader.frag"
+  );
 
   return {
     fluidSimulation: {
       vertexShader: fluidSimulationVertexShader,
       fragmentShader: fluidSimulationFragmentShader,
     },
+    smokeVertexShader,
+    smokeFragmentShader,
   };
 }
 

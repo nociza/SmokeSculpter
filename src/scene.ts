@@ -88,6 +88,16 @@ export async function initScene(): Promise<FluidSimData> {
     new THREE.Vector3(64, 64, 64)
   );
 
+  // Create a new material for the smoke
+  const smokeMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      u_smokeDensityTexture: { value: smokeDensityTexture },
+    },
+    vertexShader: shaders.smokeVertexShader, // You need to create this shader
+    fragmentShader: shaders.smokeFragmentShader, // You need to create this shader
+    transparent: true,
+  });
+
   const fluidSimulationShader = shaders.fluidSimulation;
 
   const fluidSimulationMaterial = new THREE.ShaderMaterial({
@@ -105,11 +115,9 @@ export async function initScene(): Promise<FluidSimData> {
     glslVersion: THREE.GLSL3,
   });
 
-  const fluidSimulationMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(2, 2),
-    fluidSimulationMaterial
-  );
-  scene.add(fluidSimulationMesh);
+  const smokeGeometry = new THREE.BoxGeometry(1, 1, 1);
+  const smokeMesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
+  scene.add(smokeMesh);
 
   const sceneData: SceneData = {
     scene,
