@@ -20,6 +20,7 @@ interface SceneData {
 export interface FluidSimData {
   sceneData: SceneData;
   shaders: Shaders;
+  smokeDensityTexture: THREE.DataTexture;
 }
 
 export async function initScene(): Promise<FluidSimData> {
@@ -98,7 +99,6 @@ export async function initScene(): Promise<FluidSimData> {
       u_resolution: {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
       },
-      u_smokeDensityTexture: { value: smokeDensityTexture }, // Add this line
     },
     vertexShader: fluidSimulationShader.vertexShader,
     fragmentShader: fluidSimulationShader.fragmentShader,
@@ -125,7 +125,7 @@ export async function initScene(): Promise<FluidSimData> {
     prevTime: 0,
   };
 
-  return { sceneData, shaders };
+  return { sceneData, shaders, smokeDensityTexture };
 }
 
 export function updateScene(
@@ -199,4 +199,33 @@ function createSmokeDensityTexture(gridSize: THREE.Vector3): THREE.DataTexture {
   texture.magFilter = THREE.LinearFilter;
 
   return texture;
+}
+
+export function addSmoke(
+  fluidSimData: FluidSimData,
+  x: number,
+  y: number,
+  radius: number
+) {
+  console.log("add smoke: ", x, y, radius);
+  const gridSize =
+    fluidSimData.sceneData.fluidSimulationMaterial.uniforms.u_gridSize.value;
+  const data = fluidSimData.smokeDensityTexture.image.data;
+
+  for (let z = 0; z < gridSize.z; z++) {
+    for (let j = 0; j < gridSize.y; j++) {
+      for (let i = 0; i < gridSize.x; i++) {
+        const index = i + j * gridSize.x + z * gridSize.x * gridSize.y;
+        const position = new THREE.Vector3(i, j, z);
+        const clickPosition = new THREE.Vector3(x, y, gridSize.z * 0.5);
+        const distance = position.distanceTo(clickPosition);
+
+        if (distance < radius) {
+          data[index] = 255;
+        }
+      }
+    }
+  }
+
+  fluidSimData.smokeDensityTexture.needsUpdate = true;
 }

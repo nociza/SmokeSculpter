@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { FluidSimData, initScene, updateScene } from "./scene";
+import { FluidSimData, initScene, updateScene, addSmoke } from "./scene";
 
 let fluidSimData: FluidSimData;
 
@@ -11,6 +11,9 @@ let fluidSimData: FluidSimData;
     new THREE.Vector2(window.innerWidth, window.innerHeight);
 
   animate(performance.now());
+
+  // Add an event listener for the click event
+  window.addEventListener("click", onClick);
 })();
 
 function animate(time: number) {
@@ -21,4 +24,18 @@ function animate(time: number) {
   updateScene(time * 0.001, delta * 0.001, fluidSimData);
 
   fluidSimData.sceneData.prevTime = time;
+}
+
+// Add this function to handle the click event
+function onClick(event: MouseEvent) {
+  const x = Math.floor(
+    (event.clientX / window.innerWidth) *
+      fluidSimData.sceneData.fluidSimulationMaterial.uniforms.u_gridSize.value.x
+  );
+  const y = Math.floor(
+    (event.clientY / window.innerHeight) *
+      fluidSimData.sceneData.fluidSimulationMaterial.uniforms.u_gridSize.value.y
+  );
+
+  addSmoke(fluidSimData, x, y, 5);
 }
