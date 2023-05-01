@@ -1,34 +1,24 @@
-import { initScene, handleKeyPress, updateScene } from "./scene";
 import * as THREE from "three";
+import { FluidSimData, initScene, updateScene } from "./scene";
 
-var mouseposition = { x: 0, y: 0 };
+let fluidSimData: FluidSimData;
 
 (async () => {
-  const fluidSimData = await initScene();
-  const sceneData = fluidSimData.sceneData;
+  fluidSimData = await initScene();
 
-  // Add an event listener for keypress events
-  window.addEventListener("keypress", (event) => {
-    handleKeyPress(sceneData, mouseposition, event);
-  });
+  // Set the resolution uniform
+  fluidSimData.sceneData.fluidSimulationMaterial.uniforms.u_resolution.value =
+    new THREE.Vector2(window.innerWidth, window.innerHeight);
 
-  // Track mouse position
-  window.addEventListener("mousemove", (event) => {
-    mouseposition.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseposition.y = -((event.clientY / window.innerHeight) * 2 - 1);
-  });
-
-  const clock = new THREE.Clock();
-  const animate = () => {
-    requestAnimationFrame(animate);
-    const delta = clock.getDelta();
-    const elapsedTime = clock.getElapsedTime();
-
-    updateScene(elapsedTime, delta, fluidSimData);
-
-    sceneData.renderer.render(sceneData.scene, sceneData.camera);
-    sceneData.controls.update();
-  };
-
-  animate();
+  animate(performance.now());
 })();
+
+function animate(time: number) {
+  requestAnimationFrame(animate);
+
+  const delta = Math.min(0.1, time - fluidSimData.sceneData.prevTime);
+
+  updateScene(time * 0.001, delta * 0.001, fluidSimData);
+
+  fluidSimData.sceneData.prevTime = time;
+}
