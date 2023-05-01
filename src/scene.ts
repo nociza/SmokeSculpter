@@ -11,8 +11,8 @@ interface SceneData {
   gui: GUI;
   velocityFramebuffer1: THREE.WebGLRenderTarget;
   velocityFramebuffer2: THREE.WebGLRenderTarget;
-  velocityTexture1: THREE.Texture;
-  velocityTexture2: THREE.Texture;
+  velocityTexture1: THREE.Data3DTexture;
+  velocityTexture2: THREE.Data3DTexture;
   fluidSimulationMaterial: THREE.ShaderMaterial;
   prevTime: number;
 }
@@ -42,7 +42,6 @@ export async function initScene(): Promise<FluidSimData> {
   controls.update();
 
   const gui = new GUI();
-
   const shaders = await loadShaders();
 
   const renderTargetOptions = {
@@ -64,8 +63,29 @@ export async function initScene(): Promise<FluidSimData> {
     renderTargetOptions
   );
 
-  const velocityTexture1 = velocityFramebuffer1.texture;
-  const velocityTexture2 = velocityFramebuffer2.texture;
+  const gridSize = 64;
+  const velocityTexture1 = create3DTexture(gridSize, gridSize, gridSize);
+  const velocityTexture2 = create3DTexture(gridSize, gridSize, gridSize);
+
+  const initialSmokeDensity = new Float32Array(64 * 64 * 64);
+  const halfGridSize = 32;
+  for (let z = 0; z < 64; z++) {
+    for (let y = 0; y < 64; y++) {
+      for (let x = 0; x < 64; x++) {
+        const index = x + y * 64 + z * 64 * 64;
+        const distance = Math.sqrt(
+          Math.pow(x - halfGridSize, 2) +
+            Math.pow(y - halfGridSize, 2) +
+            Math.pow(z - halfGridSize, 2)
+        );
+        initialSmokeDensity[index] = distance < 8 ? 1.0 : 0.0;
+      }
+    }
+  }
+
+  const smokeDensityTexture = createSmokeDensityTexture(
+    new THREE.Vector3(64, 64, 64)
+  );
 
   const fluidSimulationShader = shaders.fluidSimulation;
 
@@ -77,10 +97,12 @@ export async function initScene(): Promise<FluidSimData> {
       u_velocityTexture: { value: velocityTexture1 },
       u_resolution: {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
-      }, // Add this line
+      },
+      u_smokeDensityTexture: { value: smokeDensityTexture }, // Add this line
     },
     vertexShader: fluidSimulationShader.vertexShader,
     fragmentShader: fluidSimulationShader.fragmentShader,
+    glslVersion: THREE.GLSL3,
   });
 
   const fluidSimulationMesh = new THREE.Mesh(
@@ -121,12 +143,12 @@ export function updateScene(
   sceneData.renderer.setRenderTarget(sceneData.velocityFramebuffer2);
   sceneData.renderer.render(sceneData.scene, sceneData.camera);
 
-  // Swap the velocity framebuffers and update the uniform
-  const temp = sceneData.velocityFramebuffer1;
-  sceneData.velocityFramebuffer1 = sceneData.velocityFramebuffer2;
-  sceneData.velocityFramebuffer2 = temp;
+  // Swap the velocity textures and update the uniform
+  const temp = sceneData.velocityTexture1;
+  sceneData.velocityTexture1 = sceneData.velocityTexture2;
+  sceneData.velocityTexture2 = temp;
   sceneData.fluidSimulationMaterial.uniforms.u_velocityTexture.value =
-    sceneData.velocityFramebuffer1.texture;
+    sceneData.velocityTexture1;
 
   // Render the scene to the screen
   sceneData.renderer.setRenderTarget(null);
@@ -137,4 +159,44 @@ export function updateScene(
 
   // Update prevTime
   sceneData.prevTime = time;
+}
+
+function create3DTexture(
+  width: number,
+  height: number,
+  depth: number
+): THREE.Data3DTexture {
+  const data = new Float32Array(width * height * depth * 4);
+  return new THREE.Data3DTexture(data, width, height, depth);
+}
+
+function createSmokeDensityTexture(gridSize: THREE.Vector3): THREE.DataTexture {
+  const data = new Uint8Array(gridSize.x * gridSize.y * gridSize.z);
+  const center = gridSize.clone().multiplyScalar(0.5);
+
+  for (let z = 0; z < gridSize.z; z++) {
+    for (let y = 0; y < gridSize.y; y++) {
+      for (let x = 0; x < gridSize.x; x++) {
+        const index = x + y * gridSize.x + z * gridSize.x * gridSize.y;
+        const position = new THREE.Vector3(x, y, z);
+        const distance = position.distanceTo(center);
+
+        data[index] = distance < 5.0 ? 255 : 0;
+      }
+    }
+  }
+
+  const texture = new THREE.DataTexture(
+    data,
+    gridSize.x,
+    gridSize.y,
+    THREE.RedFormat,
+    THREE.UnsignedByteType
+  );
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  return texture;
 }

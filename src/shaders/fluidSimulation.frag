@@ -1,16 +1,17 @@
-#version 300 es
 precision highp float;
 
 uniform float u_time;
 uniform float u_deltaTime;
 uniform vec3 u_gridSize;
-uniform sampler2D u_velocityTexture;
+precision highp sampler3D;
+uniform sampler3D u_velocityTexture;
+uniform sampler3D u_smokeDensityTexture;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 // Helper function to sample velocities
-vec3 sampleVelocity(sampler2D texture, vec3 coord) {
-  return texture2D(texture, coord.xy / u_gridSize.xy).xyz;
+vec3 sampleVelocity(sampler3D tex, vec3 coord) {
+  return texture(tex, coord).xyz;
 }
 
 void main() {
@@ -34,9 +35,13 @@ void main() {
     sampleVelocity(u_velocityTexture, texCoord - vec3(0.0, 0.0, 1.0))
   ) / 6.0;
 
-  // Calculate the next velocity
-  vec3 nextVelocity = advectedVelocity + diffuseVelocity;
+  // Combine advection and diffusion
+  vec3 updatedVelocity = advectedVelocity + diffuseVelocity;
 
-  // Store the result in the output fragment color
-  fragColor = vec4(nextVelocity, 1.0);
+  // Add smoke density as a visual representation
+  float smokeDensity = texture(u_smokeDensityTexture, texCoord).r;
+  vec3 outputColor = mix(vec3(0.0), vec3(1.0), smokeDensity);
+
+  // Use smoke density as the output color
+  fragColor = vec4(vec3(smokeDensity), 1.0);
 }

@@ -1,7 +1,10 @@
 import * as THREE from "three";
 
 export interface Shaders {
-  fluidSimulation: THREE.ShaderMaterial;
+  fluidSimulation: {
+    vertexShader: string;
+    fragmentShader: string;
+  };
 }
 
 export async function loadShaders(): Promise<Shaders> {
@@ -12,19 +15,13 @@ export async function loadShaders(): Promise<Shaders> {
     "shaders/fluidSimulation.frag"
   );
 
-  const fluidSimulation = new THREE.ShaderMaterial({
-    vertexShader: fluidSimulationVertexShader,
-    fragmentShader: fluidSimulationFragmentShader,
-    uniforms: {
-      u_resolution: { value: new THREE.Vector2() },
-      u_velocityTexture: { value: null },
-      u_time: { value: 0.0 },
-      u_deltaTime: { value: 0.0 },
-    },
-  });
+  console.log(fluidSimulationVertexShader);
 
   return {
-    fluidSimulation,
+    fluidSimulation: {
+      vertexShader: fluidSimulationVertexShader,
+      fragmentShader: fluidSimulationFragmentShader,
+    },
   };
 }
 
