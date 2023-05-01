@@ -5,7 +5,7 @@ uniform sampler3D u_smokeDensityTexture;
 
 in vec4 v_worldPos;
 
-out vec4 outColor;
+layout(location = 1) out vec4 outColor;
 
 void main() {
     vec3 texCoord = (v_worldPos.xyz + 1.0) / 2.0;
