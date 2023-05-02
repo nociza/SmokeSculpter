@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import * as THREE from "three";
 import Stats from "stats.js";
-import { Vector2, Vector3, Matrix4 } from "./math";
+import { Vector2, Vector3, Matrix4 } from "./lib/math";
 import {loadShaders} from "./shaders";
 
 (async function () {

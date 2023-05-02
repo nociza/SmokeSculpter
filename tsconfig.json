@@ -22,7 +22,8 @@
   ],
   "include": [
     "src/**/*.ts",
-    "src/index.html", "src/math.js",
+    "src/index.html",
+    "src/lib/math.js"
   ],
   "exclude": [
     "node_modules"
