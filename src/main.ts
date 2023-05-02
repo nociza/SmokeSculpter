@@ -152,7 +152,7 @@ import { Vector2, Vector3, Matrix4 } from "./math";
   let mousePosition = new THREE.Vector2(0.0, 0.0);
   let mousePressing = false;
   window.addEventListener("mousemove", (event) => {
-    mousePosition = new Vector2(
+    mousePosition = new THREE.Vector2(
       event.clientX,
       window.innerHeight - event.clientY
     );
@@ -209,7 +209,7 @@ import { Vector2, Vector3, Matrix4 } from "./math";
     }
   }
 
-  const canvas = document.getElementById("canvas");
+  const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const resizeCanvas = function () {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -715,7 +715,7 @@ import { Vector2, Vector3, Matrix4 } from "./math";
       );
       gl.uniform1f(addSmokeUniforms["u_deltaTime"], deltaTime);
       gl.uniform1f(addSmokeUniforms["u_gridSpacing"], GRID_SPACING);
-      gl.uniform1i(addSmokeUniforms["u_addHeat"], mousePressing);
+      gl.uniform1i(addSmokeUniforms["u_addHeat"], mousePressing ? 1 : 0);
       const heatSourceCenter = new Vector2(
         mousePosition.x / canvas.width,
         mousePosition.y / canvas.height
