@@ -442,10 +442,11 @@ const VIEW_MATRIX = Matrix4.inverse(
       updateVelocity(deltaTime);
       updateSmoke(deltaTime);
     };
+
     let mvpMatrix;
     mvpMatrix = getMVP(canvas.width, canvas.height);
     window.addEventListener("resize", (_) => {
-      getMVP(canvas.width, canvas.height);
+      mvpMatrix = getMVP(canvas.width, canvas.height);
     });
 
     const render = function () {
