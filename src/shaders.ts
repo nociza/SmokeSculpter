@@ -1,12 +1,29 @@
 import * as THREE from "three";
 
 export interface Shaders {
-  advection: THREE.ShaderMaterial;
-  splat: THREE.ShaderMaterial;
-  divergence: THREE.ShaderMaterial;
-  jacobi: THREE.ShaderMaterial;
-  pressure: THREE.ShaderMaterial;
-  gradientSubtract: THREE.ShaderMaterial;
+  initializeSmokeProgram;
+  initializeVelocityProgram;
+  addBuoyancyForceProgram;
+  advectVelocityProgram;
+  computePressureProgram;
+  addPressureForceProgram;
+  decayVelocityProgram;
+  advectSmokeProgram;
+  addSmokeProgram;
+  renderVelocityProgram;
+  renderDensityProgram;
+  renderTemperatureProgram;
+  initializeSmokeUniforms;
+  addBuoyancyForceUniforms;
+  advectVelocityUniforms;
+  computePressureUniforms;
+  addPressureForceUniforms;
+  decayVelocityUniforms;
+  advectSmokeUniforms;
+  addSmokeUniforms;
+  renderVelocityUniforms;
+  renderDensityUniforms;
+  renderTemperatureUniforms;
 }
 
 export async function loadShaderFile(shaderPath: string): Promise<string> {
@@ -14,113 +31,269 @@ export async function loadShaderFile(shaderPath: string): Promise<string> {
   return response.text();
 }
 
-export function createFullscreenQuad(): THREE.Mesh {
-  const geometry = new THREE.BufferGeometry();
-  const vertices = new Float32Array([
-    -1.0, -1.0, 0.0, 3.0, -1.0, 0.0, -1.0, 3.0, 0.0,
+function createShader(gl, source, type) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        throw new Error(gl.getShaderInfoLog(shader) + source);
+    }
+    return shader;
+}
+
+function createProgramFromSource(gl, vertexShaderSource, fragmentShaderSource) {
+  const program = gl.createProgram();
+  gl.attachShader(
+    program,
+    createShader(gl, vertexShaderSource, gl.VERTEX_SHADER)
+  );
+  gl.attachShader(
+    program,
+    createShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER)
+  );
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    throw new Error(gl.getProgramInfoLog(program));
+  }
+  return program;
+}
+
+function getUniformLocations(gl, program, keys) {
+  const locations = {};
+  keys.forEach((key) => {
+    locations[key] = gl.getUniformLocation(program, key);
+  });
+  return locations;
+}
+
+export async function loadShaders(
+  gl: WebGL2RenderingContext
+): Promise<Shaders> {
+  const initializeVelocityProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/initialize_velocity.frag")
+  );
+  const initializeSmokeProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/initialize_smoke.frag")
+  );
+  const addBuoyancyForceProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/add_buoyancy_force.frag")
+  );
+  const advectVelocityProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/advect_velocity.frag")
+  );
+  const computePressureProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/compute_pressure.frag")
+  );
+  const addPressureForceProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/add_pressure_force.frag")
+  );
+  const decayVelocityProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/decay_velocity.frag")
+  );
+  const advectSmokeProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/advect_smoke.frag")
+  );
+  const addSmokeProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/fill_viewport.vert"),
+    await loadShaderFile("shaders/add_smoke.frag")
+  );
+  const renderVelocityProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/raymarch.vert"),
+    await loadShaderFile("shaders/render_velocity.frag")
+  );
+  const renderDensityProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/raymarch.vert"),
+    await loadShaderFile("shaders/render_density.frag")
+  );
+  const renderTemperatureProgram = createProgramFromSource(
+    gl,
+    await loadShaderFile("shaders/raymarch.vert"),
+    await loadShaderFile("shaders/render_temperature.frag")
+  );
+
+  const initializeSmokeUniforms = getUniformLocations(
+    gl,
+    initializeSmokeProgram,
+    [
+      "u_cellNum",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_gridSpacing",
+      "u_simulationSpace",
+    ]
+  );
+  const addBuoyancyForceUniforms = getUniformLocations(
+    gl,
+    addBuoyancyForceProgram,
+    [
+      "u_cellNum",
+      "u_cellTextureSize",
+      "u_velocityTexture",
+      "u_smokeTexture",
+      "u_deltaTime",
+      "u_densityScale",
+      "u_temperatureScale",
+    ]
+  );
+  const advectVelocityUniforms = getUniformLocations(
+    gl,
+    advectVelocityProgram,
+    [
+      "u_cellNum",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_velocityTexture",
+      "u_deltaTime",
+      "u_gridSpacing",
+    ]
+  );
+  const computePressureUniforms = getUniformLocations(
+    gl,
+    computePressureProgram,
+    [
+      "u_cellNum",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_velocityTexture",
+      "u_pressureTexture",
+      "u_deltaTime",
+      "u_gridSpacing",
+      "u_density",
+    ]
+  );
+  const addPressureForceUniforms = getUniformLocations(
+    gl,
+    addPressureForceProgram,
+    [
+      "u_cellNum",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_velocityTexture",
+      "u_pressureTexture",
+      "u_deltaTime",
+      "u_gridSpacing",
+      "u_density",
+    ]
+  );
+  const decayVelocityUniforms = getUniformLocations(gl, decayVelocityProgram, [
+    "u_velocityTexture",
+    "u_deltaTime",
+    "u_velocityDecay",
   ]);
-  geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-  const material = new THREE.MeshBasicMaterial();
-  return new THREE.Mesh(geometry, material);
-}
+  const advectSmokeUniforms = getUniformLocations(gl, advectSmokeProgram, [
+    "u_cellNum",
+    "u_cellTextureSize",
+    "u_resolution",
+    "u_velocityTexture",
+    "u_smokeTexture",
+    "u_deltaTime",
+    "u_gridSpacing",
+  ]);
+  const addSmokeUniforms = getUniformLocations(gl, addSmokeProgram, [
+    "u_cellNum",
+    "u_cellTextureSize",
+    "u_resolution",
+    "u_simulationSpace",
+    "u_smokeTexture",
+    "u_deltaTime",
+    "u_gridSpacing",
+    "u_addHeat",
+    "u_mousePosition",
+    "u_heatSourceRadius",
+    "u_heatSourceIntensity",
+    "u_densityDecay",
+    "u_temperatureDecay",
+  ]);
+  const renderVelocityUniforms = getUniformLocations(
+    gl,
+    renderVelocityProgram,
+    [
+      "u_mvpMatrix",
+      "u_modelMatrix",
+      "u_invModelMatrix",
+      "u_scale",
+      "u_cameraPosition",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_simulationSpace",
+      "u_velocityTexture",
+      "u_gridSpacing",
+    ]
+  );
+  const renderDensityUniforms = getUniformLocations(gl, renderDensityProgram, [
+    "u_mvpMatrix",
+    "u_modelMatrix",
+    "u_invModelMatrix",
+    "u_scale",
+    "u_cameraPosition",
+    "u_cellTextureSize",
+    "u_resolution",
+    "u_simulationSpace",
+    "u_smokeTexture",
+    "u_gridSpacing",
+  ]);
+  const renderTemperatureUniforms = getUniformLocations(
+    gl,
+    renderTemperatureProgram,
+    [
+      "u_mvpMatrix",
+      "u_modelMatrix",
+      "u_invModelMatrix",
+      "u_scale",
+      "u_cameraPosition",
+      "u_cellTextureSize",
+      "u_resolution",
+      "u_simulationSpace",
+      "u_smokeTexture",
+      "u_gridSpacing",
+    ]
+  );
 
-function createShaderMaterial(
-  vertexShader: string,
-  fragmentShader: string,
-  uniforms: any
-): THREE.ShaderMaterial {
-  return new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms,
-  });
-}
-
-export async function loadShaders(): Promise<Shaders> {
-  const shaders: Shaders = {
-    advection: null,
-    splat: null,
-    divergence: null,
-    jacobi: null,
-    pressure: null,
-    gradientSubtract: null,
+  const shaders = {
+    initializeSmokeProgram,
+    initializeVelocityProgram,
+    addBuoyancyForceProgram,
+    advectVelocityProgram,
+    computePressureProgram,
+    addPressureForceProgram,
+    decayVelocityProgram,
+    advectSmokeProgram,
+    addSmokeProgram,
+    renderVelocityProgram,
+    renderDensityProgram,
+    renderTemperatureProgram,
+    initializeSmokeUniforms,
+    addBuoyancyForceUniforms,
+    advectVelocityUniforms,
+    computePressureUniforms,
+    addPressureForceUniforms,
+    decayVelocityUniforms,
+    advectSmokeUniforms,
+    addSmokeUniforms,
+    renderVelocityUniforms,
+    renderDensityUniforms,
+    renderTemperatureUniforms,
   };
-
-  const advectionVertexShader = await loadShaderFile("shaders/advection.vert");
-  const advectionFragmentShader = await loadShaderFile(
-    "shaders/advection.frag"
-  );
-  shaders.advection = createShaderMaterial(
-    advectionVertexShader,
-    advectionFragmentShader,
-    {
-      velocity: { value: null },
-      source: { value: null },
-      dissipation: { value: null },
-      dt: { value: null },
-    }
-  );
-
-  const splatVertexShader = await loadShaderFile("shaders/splat.vert");
-  const splatFragmentShader = await loadShaderFile("shaders/splat.frag");
-  shaders.splat = createShaderMaterial(splatVertexShader, splatFragmentShader, {
-    uTarget: { value: null },
-    aspectRatio: { value: null },
-    point: { value: null },
-    color: { value: null },
-    radius: { value: null },
-  });
-
-  const divergenceVertexShader = await loadShaderFile(
-    "shaders/divergence.vert"
-  );
-  const divergenceFragmentShader = await loadShaderFile(
-    "shaders/divergence.frag"
-  );
-  shaders.divergence = createShaderMaterial(
-    divergenceVertexShader,
-    divergenceFragmentShader,
-    {
-      velocity: { value: null },
-    }
-  );
-
-  const jacobiVertexShader = await loadShaderFile("shaders/jacobi.vert");
-  const jacobiFragmentShader = await loadShaderFile("shaders/jacobi.frag");
-  shaders.jacobi = createShaderMaterial(
-    jacobiVertexShader,
-    jacobiFragmentShader,
-    {
-      pressure: { value: null },
-      divergence: { value: null },
-    }
-  );
-
-  const pressureVertexShader = await loadShaderFile("shaders/pressure.vert");
-  const pressureFragmentShader = await loadShaderFile("shaders/pressure.frag");
-  shaders.pressure = createShaderMaterial(
-    pressureVertexShader,
-    pressureFragmentShader,
-    {
-      pressure: { value: null },
-      gradient: { value: null },
-    }
-  );
-
-  const gradientSubtractVertexShader = await loadShaderFile(
-    "shaders/gradientSubtract.vert"
-  );
-  const gradientSubtractFragmentShader = await loadShaderFile(
-    "shaders/gradientSubtract.frag"
-  );
-  shaders.gradientSubtract = createShaderMaterial(
-    gradientSubtractVertexShader,
-    gradientSubtractFragmentShader,
-    {
-      velocity: { value: null },
-      pressure: { value: null },
-    }
-  );
 
   return shaders;
 }
+
