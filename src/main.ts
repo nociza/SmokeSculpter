@@ -2,7 +2,20 @@ import { GUI } from "dat.gui";
 import * as THREE from "three";
 import Stats from "stats.js";
 import { Vector2, Vector3, Matrix4 } from "./lib/math";
-import {loadShaders} from "./shaders";
+import { loadShaders } from "./shaders";
+
+const SIMULATION_RESOLUTION = new Vector3(50, 50, 50);
+const GRID_SPACING = 0.005;
+const SIMULATION_SPACE = Vector3.mul(SIMULATION_RESOLUTION, GRID_SPACING);
+const CELL_NUM =
+  SIMULATION_RESOLUTION.x * SIMULATION_RESOLUTION.y * SIMULATION_RESOLUTION.z;
+const RENDER_SCALE = Vector3.mul(SIMULATION_SPACE, 75.0 / SIMULATION_SPACE.y);
+const CAMERA_POSITION = new Vector3(100.0, 100.0, 150.0);
+const MODEL_MATRIX = Matrix4.identity;
+const iNV_MODEL_MATRIX = Matrix4.identity;
+const VIEW_MATRIX = Matrix4.inverse(
+  Matrix4.lookAt(CAMERA_POSITION, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
+);
 
 (async function () {
   let mousePosition = new THREE.Vector2(0.0, 0.0);
@@ -50,12 +63,6 @@ import {loadShaders} from "./shaders";
   gui.add(parameters, "time scale", 0.5, 2.0).step(0.001);
   gui.add(parameters, "render", ["density", "temperature", "velocity"]);
   gui.add(parameters, "reset");
-
-  const SIMULATION_RESOLUTION = new Vector3(50, 50, 50);
-  const GRID_SPACING = 0.005;
-  const SIMULATION_SPACE = Vector3.mul(SIMULATION_RESOLUTION, GRID_SPACING);
-  const CELL_NUM =
-    SIMULATION_RESOLUTION.x * SIMULATION_RESOLUTION.y * SIMULATION_RESOLUTION.z;
 
   let cellTextureSize;
   for (let i = 0; ; i++) {
@@ -115,7 +122,7 @@ import {loadShaders} from "./shaders";
       cellTextureSize,
       cellTextureSize
     );
-    const swapPressureFbObj = function () {
+    const swapPressureFrameBuffer = function () {
       const tmp = pressureFbObjR;
       pressureFbObjR = pressureFbObjW;
       pressureFbObjW = tmp;
@@ -131,7 +138,7 @@ import {loadShaders} from "./shaders";
       cellTextureSize,
       cellTextureSize
     );
-    const swapSmokeFbObj = function () {
+    const swapSmokeFrameBuffer = function () {
       const tmp = smokeFbObjR;
       smokeFbObjR = smokeFbObjW;
       smokeFbObjW = tmp;
@@ -157,14 +164,17 @@ import {loadShaders} from "./shaders";
         shaders.initializeSmokeUniforms["u_resolution"],
         SIMULATION_RESOLUTION.toArray()
       );
-      gl.uniform1f(shaders.initializeSmokeUniforms["u_gridSpacing"], GRID_SPACING);
+      gl.uniform1f(
+        shaders.initializeSmokeUniforms["u_gridSpacing"],
+        GRID_SPACING
+      );
       gl.uniform3fv(
         shaders.initializeSmokeUniforms["u_simulationSpace"],
         SIMULATION_SPACE.toArray()
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapSmokeFbObj();
+      swapSmokeFrameBuffer();
     };
 
     const addBuoyancyForce = function (deltaTime) {
@@ -220,7 +230,10 @@ import {loadShaders} from "./shaders";
         shaders.advectVelocityUniforms["u_velocityTexture"]
       );
       gl.uniform1f(shaders.advectVelocityUniforms["u_deltaTime"], deltaTime);
-      gl.uniform1f(shaders.advectVelocityUniforms["u_gridSpacing"], GRID_SPACING);
+      gl.uniform1f(
+        shaders.advectVelocityUniforms["u_gridSpacing"],
+        GRID_SPACING
+      );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       swapVelocityFbObj();
@@ -244,7 +257,10 @@ import {loadShaders} from "./shaders";
         shaders.computePressureUniforms["u_velocityTexture"]
       );
       gl.uniform1f(shaders.computePressureUniforms["u_deltaTime"], deltaTime);
-      gl.uniform1f(shaders.computePressureUniforms["u_gridSpacing"], GRID_SPACING);
+      gl.uniform1f(
+        shaders.computePressureUniforms["u_gridSpacing"],
+        GRID_SPACING
+      );
       gl.uniform1f(
         shaders.computePressureUniforms["u_density"],
         parameters["air density"]
@@ -258,7 +274,7 @@ import {loadShaders} from "./shaders";
           shaders.computePressureUniforms["u_pressureTexture"]
         );
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-        swapPressureFbObj();
+        swapPressureFrameBuffer();
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     };
@@ -288,7 +304,10 @@ import {loadShaders} from "./shaders";
         shaders.addPressureForceUniforms["u_pressureTexture"]
       );
       gl.uniform1f(shaders.addPressureForceUniforms["u_deltaTime"], deltaTime);
-      gl.uniform1f(shaders.addPressureForceUniforms["u_gridSpacing"], GRID_SPACING);
+      gl.uniform1f(
+        shaders.addPressureForceUniforms["u_gridSpacing"],
+        GRID_SPACING
+      );
       gl.uniform1f(
         shaders.addPressureForceUniforms["u_density"],
         parameters["air density"]
@@ -329,7 +348,10 @@ import {loadShaders} from "./shaders";
       gl.bindFramebuffer(gl.FRAMEBUFFER, smokeFbObjW.framebuffer);
       gl.useProgram(shaders.advectSmokeProgram);
       gl.uniform1i(shaders.advectSmokeUniforms["u_cellNum"], CELL_NUM);
-      gl.uniform1i(shaders.advectSmokeUniforms["u_cellTextureSize"], cellTextureSize);
+      gl.uniform1i(
+        shaders.advectSmokeUniforms["u_cellTextureSize"],
+        cellTextureSize
+      );
       gl.uniform3iv(
         shaders.advectSmokeUniforms["u_resolution"],
         SIMULATION_RESOLUTION.toArray()
@@ -350,14 +372,17 @@ import {loadShaders} from "./shaders";
       gl.uniform1f(shaders.advectSmokeUniforms["u_gridSpacing"], GRID_SPACING);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapSmokeFbObj();
+      swapSmokeFrameBuffer();
     };
 
     const addSmoke = function (deltaTime) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, smokeFbObjW.framebuffer);
       gl.useProgram(shaders.addSmokeProgram);
       gl.uniform1i(shaders.addSmokeUniforms["u_cellNum"], CELL_NUM);
-      gl.uniform1i(shaders.addSmokeUniforms["u_cellTextureSize"], cellTextureSize);
+      gl.uniform1i(
+        shaders.addSmokeUniforms["u_cellTextureSize"],
+        cellTextureSize
+      );
       gl.uniform3iv(
         shaders.addSmokeUniforms["u_resolution"],
         SIMULATION_RESOLUTION.toArray()
@@ -374,7 +399,10 @@ import {loadShaders} from "./shaders";
       );
       gl.uniform1f(shaders.addSmokeUniforms["u_deltaTime"], deltaTime);
       gl.uniform1f(shaders.addSmokeUniforms["u_gridSpacing"], GRID_SPACING);
-      gl.uniform1i(shaders.addSmokeUniforms["u_addHeat"], mousePressing ? 1 : 0);
+      gl.uniform1i(
+        shaders.addSmokeUniforms["u_addHeat"],
+        mousePressing ? 1 : 0
+      );
       const heatSourceCenter = new Vector2(
         mousePosition.x / canvas.width,
         mousePosition.y / canvas.height
@@ -401,7 +429,7 @@ import {loadShaders} from "./shaders";
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapSmokeFbObj();
+      swapSmokeFrameBuffer();
     };
 
     const updateSmoke = function (deltaTime) {
@@ -414,189 +442,186 @@ import {loadShaders} from "./shaders";
       updateVelocity(deltaTime);
       updateSmoke(deltaTime);
     };
-
-    const RENDER_SCALE = Vector3.mul(
-      SIMULATION_SPACE,
-      75.0 / SIMULATION_SPACE.y
-    );
-    const CAMERA_POSITION = new Vector3(100.0, 100.0, 150.0);
-    const MODEL_MATRIX = Matrix4.identity;
-    const iNV_MODEL_MATRIX = Matrix4.identity;
-    const VIEW_MATRIX = Matrix4.inverse(
-      Matrix4.lookAt(CAMERA_POSITION, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
-    );
     let mvpMatrix;
-    const setMvpMatrix = function () {
-      const projectionMatrix = Matrix4.perspective(
-        canvas.width / canvas.height,
-        60.0,
-        0.01,
-        1000.0
-      );
-      mvpMatrix = Matrix4.mul(VIEW_MATRIX, projectionMatrix);
-    };
-    setMvpMatrix();
+    mvpMatrix = getMVP(canvas.width, canvas.height);
     window.addEventListener("resize", (_) => {
-      setMvpMatrix();
+      getMVP(canvas.width, canvas.height);
     });
 
-    const renderVelocity = function () {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      gl.useProgram(shaders.renderVelocityProgram);
-      gl.uniformMatrix4fv(
-        shaders.renderVelocityUniforms["u_mvpMatrix"],
-        false,
-        mvpMatrix.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderVelocityUniforms["u_modelMatrix"],
-        false,
-        MODEL_MATRIX.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderVelocityUniforms["u_invModelMatrix"],
-        false,
-        iNV_MODEL_MATRIX.elements
-      );
-      gl.uniform3fv(shaders.renderVelocityUniforms["u_scale"], RENDER_SCALE.toArray());
-      gl.uniform3fv(
-        shaders.renderVelocityUniforms["u_cameraPosition"],
-        CAMERA_POSITION.toArray()
-      );
-      gl.uniform1i(
-        shaders.renderVelocityUniforms["u_cellTextureSize"],
-        cellTextureSize
-      );
-      gl.uniform3iv(
-        shaders.renderVelocityUniforms["u_resolution"],
-        SIMULATION_RESOLUTION.toArray()
-      );
-      gl.uniform3fv(
-        shaders.renderVelocityUniforms["u_simulationSpace"],
-        SIMULATION_SPACE.toArray()
-      );
-      setUniformTexture(
-        gl,
-        0,
-        velocityFbObjR.velocityTexture,
-        shaders.renderVelocityUniforms["u_velocityTexture"]
-      );
-      gl.uniform1f(shaders.renderVelocityUniforms["u_gridSpacing"], GRID_SPACING);
-      gl.enable(gl.DEPTH_TEST);
-      gl.enable(gl.CULL_FACE);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.drawArrays(gl.TRIANGLES, 0, 36);
-      gl.disable(gl.DEPTH_TEST);
-      gl.disable(gl.CULL_FACE);
-      gl.disable(gl.BLEND);
-    };
-
-    const renderDensity = function () {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      gl.useProgram(shaders.renderDensityProgram);
-      gl.uniformMatrix4fv(
-        shaders.renderDensityUniforms["u_mvpMatrix"],
-        false,
-        mvpMatrix.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderDensityUniforms["u_modelMatrix"],
-        false,
-        MODEL_MATRIX.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderDensityUniforms["u_invModelMatrix"],
-        false,
-        iNV_MODEL_MATRIX.elements
-      );
-      gl.uniform3fv(shaders.renderDensityUniforms["u_scale"], RENDER_SCALE.toArray());
-      gl.uniform3fv(
-        shaders.renderDensityUniforms["u_cameraPosition"],
-        CAMERA_POSITION.toArray()
-      );
-      gl.uniform1i(shaders.renderDensityUniforms["u_cellTextureSize"], cellTextureSize);
-      gl.uniform3iv(
-        shaders.renderDensityUniforms["u_resolution"],
-        SIMULATION_RESOLUTION.toArray()
-      );
-      gl.uniform3fv(
-        shaders.renderDensityUniforms["u_simulationSpace"],
-        SIMULATION_SPACE.toArray()
-      );
-      setUniformTexture(
-        gl,
-        0,
-        smokeFbObjR.smokeTexture,
-        shaders.renderDensityUniforms["u_smokeTexture"]
-      );
-      gl.uniform1f(shaders.renderDensityUniforms["u_gridSpacing"], GRID_SPACING);
-      gl.enable(gl.DEPTH_TEST);
-      gl.enable(gl.CULL_FACE);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.drawArrays(gl.TRIANGLES, 0, 36);
-      gl.disable(gl.DEPTH_TEST);
-      gl.disable(gl.CULL_FACE);
-      gl.disable(gl.BLEND);
-    };
-
-    const renderTemperature = function () {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      gl.useProgram(shaders.renderTemperatureProgram);
-      gl.uniformMatrix4fv(
-        shaders.renderTemperatureUniforms["u_mvpMatrix"],
-        false,
-        mvpMatrix.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderTemperatureUniforms["u_modelMatrix"],
-        false,
-        MODEL_MATRIX.elements
-      );
-      gl.uniformMatrix4fv(
-        shaders.renderTemperatureUniforms["u_invModelMatrix"],
-        false,
-        iNV_MODEL_MATRIX.elements
-      );
-      gl.uniform3fv(
-        shaders.renderTemperatureUniforms["u_scale"],
-        RENDER_SCALE.toArray()
-      );
-      gl.uniform3fv(
-        shaders.renderTemperatureUniforms["u_cameraPosition"],
-        CAMERA_POSITION.toArray()
-      );
-      gl.uniform1i(
-        shaders.renderTemperatureUniforms["u_cellTextureSize"],
-        cellTextureSize
-      );
-      gl.uniform3iv(
-        shaders.renderTemperatureUniforms["u_resolution"],
-        SIMULATION_RESOLUTION.toArray()
-      );
-      gl.uniform3fv(
-        shaders.renderTemperatureUniforms["u_simulationSpace"],
-        SIMULATION_SPACE.toArray()
-      );
-      setUniformTexture(
-        gl,
-        0,
-        smokeFbObjR.smokeTexture,
-        shaders.renderTemperatureUniforms["u_smokeTexture"]
-      );
-      gl.uniform1f(shaders.renderTemperatureUniforms["u_gridSpacing"], GRID_SPACING);
-      gl.enable(gl.DEPTH_TEST);
-      gl.enable(gl.CULL_FACE);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      gl.drawArrays(gl.TRIANGLES, 0, 36);
-      gl.disable(gl.DEPTH_TEST);
-      gl.disable(gl.CULL_FACE);
-      gl.disable(gl.BLEND);
-    };
-
     const render = function () {
+      const renderVelocity = function () {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(shaders.renderVelocityProgram);
+        gl.uniformMatrix4fv(
+          shaders.renderVelocityUniforms["u_mvpMatrix"],
+          false,
+          mvpMatrix.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderVelocityUniforms["u_modelMatrix"],
+          false,
+          MODEL_MATRIX.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderVelocityUniforms["u_invModelMatrix"],
+          false,
+          iNV_MODEL_MATRIX.elements
+        );
+        gl.uniform3fv(
+          shaders.renderVelocityUniforms["u_scale"],
+          RENDER_SCALE.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderVelocityUniforms["u_cameraPosition"],
+          CAMERA_POSITION.toArray()
+        );
+        gl.uniform1i(
+          shaders.renderVelocityUniforms["u_cellTextureSize"],
+          cellTextureSize
+        );
+        gl.uniform3iv(
+          shaders.renderVelocityUniforms["u_resolution"],
+          SIMULATION_RESOLUTION.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderVelocityUniforms["u_simulationSpace"],
+          SIMULATION_SPACE.toArray()
+        );
+        setUniformTexture(
+          gl,
+          0,
+          velocityFbObjR.velocityTexture,
+          shaders.renderVelocityUniforms["u_velocityTexture"]
+        );
+        gl.uniform1f(
+          shaders.renderVelocityUniforms["u_gridSpacing"],
+          GRID_SPACING
+        );
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+      };
+
+      const renderDensity = function () {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(shaders.renderDensityProgram);
+        gl.uniformMatrix4fv(
+          shaders.renderDensityUniforms["u_mvpMatrix"],
+          false,
+          mvpMatrix.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderDensityUniforms["u_modelMatrix"],
+          false,
+          MODEL_MATRIX.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderDensityUniforms["u_invModelMatrix"],
+          false,
+          iNV_MODEL_MATRIX.elements
+        );
+        gl.uniform3fv(
+          shaders.renderDensityUniforms["u_scale"],
+          RENDER_SCALE.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderDensityUniforms["u_cameraPosition"],
+          CAMERA_POSITION.toArray()
+        );
+        gl.uniform1i(
+          shaders.renderDensityUniforms["u_cellTextureSize"],
+          cellTextureSize
+        );
+        gl.uniform3iv(
+          shaders.renderDensityUniforms["u_resolution"],
+          SIMULATION_RESOLUTION.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderDensityUniforms["u_simulationSpace"],
+          SIMULATION_SPACE.toArray()
+        );
+        setUniformTexture(
+          gl,
+          0,
+          smokeFbObjR.smokeTexture,
+          shaders.renderDensityUniforms["u_smokeTexture"]
+        );
+        gl.uniform1f(
+          shaders.renderDensityUniforms["u_gridSpacing"],
+          GRID_SPACING
+        );
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+      };
+
+      const renderTemperature = function () {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(shaders.renderTemperatureProgram);
+        gl.uniformMatrix4fv(
+          shaders.renderTemperatureUniforms["u_mvpMatrix"],
+          false,
+          mvpMatrix.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderTemperatureUniforms["u_modelMatrix"],
+          false,
+          MODEL_MATRIX.elements
+        );
+        gl.uniformMatrix4fv(
+          shaders.renderTemperatureUniforms["u_invModelMatrix"],
+          false,
+          iNV_MODEL_MATRIX.elements
+        );
+        gl.uniform3fv(
+          shaders.renderTemperatureUniforms["u_scale"],
+          RENDER_SCALE.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderTemperatureUniforms["u_cameraPosition"],
+          CAMERA_POSITION.toArray()
+        );
+        gl.uniform1i(
+          shaders.renderTemperatureUniforms["u_cellTextureSize"],
+          cellTextureSize
+        );
+        gl.uniform3iv(
+          shaders.renderTemperatureUniforms["u_resolution"],
+          SIMULATION_RESOLUTION.toArray()
+        );
+        gl.uniform3fv(
+          shaders.renderTemperatureUniforms["u_simulationSpace"],
+          SIMULATION_SPACE.toArray()
+        );
+        setUniformTexture(
+          gl,
+          0,
+          smokeFbObjR.smokeTexture,
+          shaders.renderTemperatureUniforms["u_smokeTexture"]
+        );
+        gl.uniform1f(
+          shaders.renderTemperatureUniforms["u_gridSpacing"],
+          GRID_SPACING
+        );
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
+        gl.disable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+      };
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
       if (parameters["render"] === "velocity") {
         renderVelocity();
@@ -637,20 +662,19 @@ import {loadShaders} from "./shaders";
   reset();
 })();
 
-
 function createTexture(gl, width, height, internalFormat, format, type) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      internalFormat,
-      width,
-      height,
-      0,
-      format,
-      type,
-      null
+    gl.TEXTURE_2D,
+    0,
+    internalFormat,
+    width,
+    height,
+    0,
+    format,
+    type,
+    null
   );
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -664,19 +688,19 @@ function createVelocityFramebuffer(gl, width, height) {
   const framebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
   const velocityTexture = createTexture(
-      gl,
-      width,
-      height,
-      gl.RGBA32F,
-      gl.RGBA,
-      gl.FLOAT
+    gl,
+    width,
+    height,
+    gl.RGBA32F,
+    gl.RGBA,
+    gl.FLOAT
   );
   gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      velocityTexture,
-      0
+    gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0,
+    gl.TEXTURE_2D,
+    velocityTexture,
+    0
   );
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindTexture(gl.TEXTURE_2D, null);
@@ -689,19 +713,19 @@ function createPressureFramebuffer(gl, width, height) {
   const framebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
   const pressureTexture = createTexture(
-      gl,
-      width,
-      height,
-      gl.R32F,
-      gl.RED,
-      gl.FLOAT
+    gl,
+    width,
+    height,
+    gl.R32F,
+    gl.RED,
+    gl.FLOAT
   );
   gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      pressureTexture,
-      0
+    gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0,
+    gl.TEXTURE_2D,
+    pressureTexture,
+    0
   );
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindTexture(gl.TEXTURE_2D, null);
@@ -715,19 +739,19 @@ function createSmokeFramebuffer(gl, width, height) {
   const framebuffer = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
   const smokeTexture = createTexture(
-      gl,
-      width,
-      height,
-      gl.RG32F,
-      gl.RG,
-      gl.FLOAT
+    gl,
+    width,
+    height,
+    gl.RG32F,
+    gl.RG,
+    gl.FLOAT
   );
   gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      smokeTexture,
-      0
+    gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0,
+    gl.TEXTURE_2D,
+    smokeTexture,
+    0
   );
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindTexture(gl.TEXTURE_2D, null);
@@ -741,4 +765,10 @@ function setUniformTexture(gl, index, texture, location) {
   gl.activeTexture(gl.TEXTURE0 + index);
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.uniform1i(location, index);
+}
+
+function getMVP(w, h) {
+  const projectionMatrix = Matrix4.perspective(w / h, 60.0, 0.01, 1000.0);
+  const mvpMatrix = Matrix4.mul(VIEW_MATRIX, projectionMatrix);
+  return mvpMatrix;
 }
