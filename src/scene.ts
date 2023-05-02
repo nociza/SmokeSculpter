@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GUI } from "dat.gui";
 import { loadShaders, Shaders } from "./shaders";
 
+const gridSize = 64;
 interface SceneData {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
@@ -11,8 +12,6 @@ interface SceneData {
   gui: GUI;
   velocityFramebuffer1: THREE.WebGLRenderTarget;
   velocityFramebuffer2: THREE.WebGLRenderTarget;
-  velocityTexture1: THREE.Data3DTexture;
-  velocityTexture2: THREE.Data3DTexture;
   fluidSimulationMaterial: THREE.ShaderMaterial;
   prevTime: number;
 }
@@ -45,28 +44,16 @@ export async function initScene(): Promise<FluidSimData> {
   const gui = new GUI();
   const shaders = await loadShaders();
 
-  const renderTargetOptions = {
-    format: THREE.RGBAFormat,
-    type: THREE.FloatType,
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.LinearFilter,
-    stencilBuffer: false,
-  };
-
-  const velocityFramebuffer1 = new THREE.WebGLRenderTarget(
-    window.innerWidth,
-    window.innerHeight,
-    renderTargetOptions
+  const velocityFramebuffer1 = create2DFrameBufferWithMultipleTargets(
+    gridSize,
+    gridSize,
+    gridSize
   );
-  const velocityFramebuffer2 = new THREE.WebGLRenderTarget(
-    window.innerWidth,
-    window.innerHeight,
-    renderTargetOptions
+  const velocityFramebuffer2 = create2DFrameBufferWithMultipleTargets(
+    gridSize,
+    gridSize,
+    gridSize
   );
-
-  const gridSize = 64;
-  const velocityTexture1 = create3DTexture(gridSize, gridSize, gridSize);
-  const velocityTexture2 = create3DTexture(gridSize, gridSize, gridSize);
 
   const initialSmokeDensity = new Float32Array(64 * 64 * 64);
   const halfGridSize = 32;
@@ -105,10 +92,11 @@ export async function initScene(): Promise<FluidSimData> {
       u_time: { value: 0 },
       u_deltaTime: { value: 0 },
       u_gridSize: { value: new THREE.Vector3(64, 64, 64) },
-      u_velocityTexture: { value: velocityTexture1 },
+      u_velocityTexture: { value: velocityFramebuffer1.texture },
       u_resolution: {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
       },
+      u_smokeDensityTexture: { value: smokeDensityTexture },
     },
     vertexShader: fluidSimulationShader.vertexShader,
     fragmentShader: fluidSimulationShader.fragmentShader,
@@ -127,8 +115,6 @@ export async function initScene(): Promise<FluidSimData> {
     gui,
     velocityFramebuffer1,
     velocityFramebuffer2,
-    velocityTexture1,
-    velocityTexture2,
     fluidSimulationMaterial,
     prevTime: 0,
   };
@@ -152,11 +138,11 @@ export function updateScene(
   sceneData.renderer.render(sceneData.scene, sceneData.camera);
 
   // Swap the velocity textures and update the uniform
-  const temp = sceneData.velocityTexture1;
-  sceneData.velocityTexture1 = sceneData.velocityTexture2;
-  sceneData.velocityTexture2 = temp;
+  const temp = sceneData.velocityFramebuffer1;
+  sceneData.velocityFramebuffer1 = sceneData.velocityFramebuffer2;
+  sceneData.velocityFramebuffer2 = temp;
   sceneData.fluidSimulationMaterial.uniforms.u_velocityTexture.value =
-    sceneData.velocityTexture1;
+    sceneData.velocityFramebuffer1.texture;
 
   // Render the scene to the screen
   sceneData.renderer.setRenderTarget(null);
@@ -167,15 +153,6 @@ export function updateScene(
 
   // Update prevTime
   sceneData.prevTime = time;
-}
-
-function create3DTexture(
-  width: number,
-  height: number,
-  depth: number
-): THREE.Data3DTexture {
-  const data = new Float32Array(width * height * depth * 4);
-  return new THREE.Data3DTexture(data, width, height, depth);
 }
 
 function createSmokeDensityTexture(gridSize: THREE.Vector3): THREE.DataTexture {
@@ -236,4 +213,47 @@ export function addSmoke(
   }
 
   fluidSimData.smokeDensityTexture.needsUpdate = true;
+}
+
+function create2DFrameBufferWithMultipleTargets(width, height, depth) {
+  const renderTarget = new THREE.WebGLRenderTarget(width, height, {
+    format: THREE.RGBAFormat,
+    type: THREE.FloatType,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    stencilBuffer: false,
+    depthBuffer: false,
+  });
+
+  const dataTextures = [];
+
+  for (let i = 0; i < depth; i++) {
+    const dataTexture = new THREE.DataTexture(
+      new Float32Array(width * height * 4),
+      width,
+      height,
+      THREE.RGBAFormat,
+      THREE.FloatType
+    );
+    dataTexture.minFilter = THREE.LinearFilter;
+    dataTexture.magFilter = THREE.LinearFilter;
+    dataTexture.wrapS = THREE.ClampToEdgeWrapping;
+    dataTexture.wrapT = THREE.ClampToEdgeWrapping;
+    dataTextures.push(dataTexture);
+  }
+
+  renderTarget.texture = new THREE.DataArrayTexture(dataTextures);
+  return renderTarget;
+}
+
+function create2DArrayTexture(width, height, layers) {
+  const data = new Float32Array(width * height * layers * 4);
+  const texture = new THREE.DataArrayTexture(data, width, height, layers);
+  texture.format = THREE.RGBAFormat;
+  texture.type = THREE.FloatType;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
 }

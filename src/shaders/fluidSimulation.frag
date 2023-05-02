@@ -3,15 +3,14 @@ precision highp float;
 uniform float u_time;
 uniform float u_deltaTime;
 uniform vec3 u_gridSize;
-precision highp sampler3D;
-uniform sampler3D u_velocityTexture;
-uniform sampler3D u_smokeDensityTexture;
-
-layout(location = 0) out vec4 fragColor;
+uniform sampler2DArray u_velocityTexture;
+uniform sampler2DArray u_smokeDensityTexture;
 
 // Helper function to sample velocities
-vec3 sampleVelocity(sampler3D tex, vec3 coord) {
-  return texture(tex, coord).xyz;
+vec3 sampleVelocity(sampler2DArray tex, vec3 coord) {
+  float layer = floor(coord.z * u_gridSize.z);
+  vec2 uv = coord.xy;
+  return texture(tex, vec3(uv, layer)).xyz;
 }
 
 void main() {
@@ -39,9 +38,10 @@ void main() {
   vec3 updatedVelocity = advectedVelocity + diffuseVelocity;
 
   // Add smoke density as a visual representation
-  float smokeDensity = texture(u_smokeDensityTexture, texCoord).r;
+  float layer = floor(texCoord.z * u_gridSize.z);
+  float smokeDensity = texture(u_smokeDensityTexture, vec3(texCoord.xy, layer)).r;
   vec3 outputColor = mix(vec3(0.0), vec3(1.0), smokeDensity);
 
   // Use smoke density as the output color
-  fragColor = vec4(vec3(smokeDensity), 1.0);
+  gl_FragColor = vec4(outputColor, 1.0);
 }
