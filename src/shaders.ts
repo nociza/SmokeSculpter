@@ -9,7 +9,7 @@ export interface Shaders {
   gradientSubtract: THREE.ShaderMaterial;
 }
 
-async function loadShaderFile(shaderPath: string): Promise<string> {
+export async function loadShaderFile(shaderPath: string): Promise<string> {
   const response = await fetch(shaderPath);
   return response.text();
 }
