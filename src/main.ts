@@ -17,6 +17,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
 (async function () {
   let mousePosition = new THREE.Vector2(0.0, 0.0);
   let mousePressing = false;
+  let inSimSpace = false;
   window.addEventListener("mousemove", (event) => {
     mousePosition = new THREE.Vector2(
       event.clientX,
@@ -25,15 +26,21 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
   });
   window.addEventListener("mousedown", (_) => {
     mousePressing = true;
+    if (mousePosition.x < window.innerWidth / 2) {
+      inSimSpace = true;
+    }
   });
   window.addEventListener("mouseup", (_) => {
     mousePressing = false;
+    inSimSpace = false;
   });
   window.addEventListener("keydown", (event) => {
     if (event?.code === "KeyN") {
       addCube(mousePosition, scene, camera);
     } else if (event?.code === "Space") {
       resetCamera(camera);
+    } else if (event?.code === "KeyR") {
+      reset();
     }
   });
 
@@ -50,7 +57,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
     "density decay": 0.3,
     "temperature decay": 0.5,
     "time step": 0.005,
-    "time scale": 0.5,
+    "time scale": 1.0,
     render: "density",
     reset: (_) => reset(),
   };
@@ -449,7 +456,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       gl.uniform1f(shaders.addSmokeUniforms["u_gridSpacing"], GRID_SPACING);
       gl.uniform1i(
         shaders.addSmokeUniforms["u_addHeat"],
-        mousePressing ? 1 : 0
+        inSimSpace ? 1 : 0
       );
       const heatSourceCenter = new Vector2(
         mousePosition.x / canvas.width,
