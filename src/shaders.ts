@@ -82,7 +82,7 @@ export async function loadShaders(
   const addBuoyancyForceProgram = createProgramFromSource(
     gl,
     await loadShaderFile("shaders/fill_viewport.vert"),
-    await loadShaderFile("shaders/add_buoyancy_force.frag")
+    await loadShaderFile("shaders/buoyancy.frag")
   );
   const advectVelocityProgram = createProgramFromSource(
     gl,
@@ -97,7 +97,7 @@ export async function loadShaders(
   const addPressureForceProgram = createProgramFromSource(
     gl,
     await loadShaderFile("shaders/fill_viewport.vert"),
-    await loadShaderFile("shaders/add_pressure_force.frag")
+    await loadShaderFile("shaders/pressure.frag")
   );
   const decayVelocityProgram = createProgramFromSource(
     gl,
@@ -116,18 +116,18 @@ export async function loadShaders(
   );
   const renderVelocityProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raymarch.vert"),
-    await loadShaderFile("shaders/render_velocity.frag")
+    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/render_velocity.comp")
   );
   const renderDensityProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raymarch.vert"),
-    await loadShaderFile("shaders/render_density.frag")
+    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/render_density.comp")
   );
   const renderTemperatureProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raymarch.vert"),
-    await loadShaderFile("shaders/render_temperature.frag")
+    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/render_temperature.comp")
   );
 
   const initializeSmokeUniforms = getUniformLocations(
