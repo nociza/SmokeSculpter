@@ -29,6 +29,13 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
   window.addEventListener("mouseup", (_) => {
     mousePressing = false;
   });
+  window.addEventListener("keydown", (event) => {
+    if (event?.code === "KeyN") {
+      addCube(mousePosition, scene, camera);
+    } else if (event?.code === "Space") {
+      resetCamera(camera);
+    }
+  });
 
   const stats = new Stats();
   document.body.appendChild(stats.dom);
@@ -70,6 +77,21 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
   }
 
   const scene = new THREE.Scene();
+  const glassMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    opacity: 0.2,
+    transparent: true,
+  });
+
+  const boundarySize = SIMULATION_SPACE.clone().multiplyScalar(1.01);
+  const boundaryGeometry = new THREE.BoxGeometry(
+    boundarySize.x,
+    boundarySize.y,
+    boundarySize.z
+  );
+  const boundary = new THREE.Mesh(boundaryGeometry, glassMaterial);
+
+  scene.add(boundary);
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   canvas.setAttribute("scene", scene.id.toString());
@@ -99,13 +121,13 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
   controls.target.set(0, 0, 0);
   camera.position.set(100.0, 100.0, 150.0);
 
-  const camera_pos = camera.position;
+  let camera_pos = camera.position;
+  let view_mat = getViewMatrix(camera);
 
-  const view_mat = Matrix4.inverse(
-    Matrix4.lookAt(camera_pos, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
-  );
+  console.log(view_mat);
+  console.log(camera.matrixWorldInverse);
 
-  const proj_mat = camera.projectionMatrix;
+  let proj_mat = camera.projectionMatrix;
   console.log(proj_mat);
 
   const gl = canvas.getContext("webgl2");
@@ -470,9 +492,9 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
     };
 
     let mvpMatrix;
-    mvpMatrix = getMVP(canvas.width, canvas.height, view_mat, proj_mat);
+    mvpMatrix = getMVP(view_mat, proj_mat);
     window.addEventListener("resize", (_) => {
-      mvpMatrix = getMVP(canvas.width, canvas.height, view_mat, proj_mat);
+      mvpMatrix = getMVP(view_mat, proj_mat);
     });
 
     const render = function () {
@@ -667,6 +689,8 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
     let previousRealSeconds = performance.now() * 0.001;
     const loop = function () {
       stats.update();
+      // mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
+      // console.log(mvpMatrix.elements);
 
       const currentRealSeconds = performance.now() * 0.001;
       const nextSimulationSeconds =
@@ -796,8 +820,37 @@ function setUniformTexture(gl, index, texture, location) {
   gl.uniform1i(location, index);
 }
 
-function getMVP(w, h, view_mat, proj_mat) {
-  const projectionMatrix = Matrix4.perspective(w / h, 60.0, 0.01, 1000.0);
+function getViewMatrix(camera) {
+  return Matrix4.inverse(
+    Matrix4.lookAt(camera.position, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
+  );
+}
+
+function getMVP(view_mat, proj_mat) {
   const mvpMatrix = Matrix4.mul(view_mat, proj_mat);
   return mvpMatrix;
+}
+
+function addCube(mousePos, scene, camera) {
+  var raycaster = new THREE.Raycaster();
+  var plane = new THREE.Plane();
+  var planeNormal = new THREE.Vector3();
+  var point = new THREE.Vector3();
+  var mouse = new THREE.Vector2(mousePos.x, mousePos.y);
+  planeNormal.copy(camera.position).normalize();
+  plane.setFromNormalAndCoplanarPoint(planeNormal, scene.position);
+  raycaster.setFromCamera(mouse, camera);
+  raycaster.ray.intersectPlane(plane, point);
+
+  const geometry = new THREE.BoxGeometry(2, 2, 2);
+  const material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+  const cube = new THREE.Mesh(geometry, material);
+
+  cube.position.copy(point);
+  scene.add(cube);
+}
+
+function resetCamera(camera) {
+  camera.position.set(5, 5, 5);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
