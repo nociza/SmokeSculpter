@@ -478,15 +478,14 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
       swapSmokeFrameBuffer();
     };
 
-    const updateSmoke = function (deltaTime) {
-      advectSmoke(deltaTime);
-      addSmoke(deltaTime);
-    };
-
+    /**************************************************************************
+     *                              Main Loop                                 *
+     **************************************************************************/
     const stepSimulation = function (deltaTime) {
       gl.viewport(0.0, 0.0, CELL_TEXTURE_SIZE, CELL_TEXTURE_SIZE);
       updateVelocity(deltaTime);
-      updateSmoke(deltaTime);
+      advectSmoke(deltaTime);
+      addSmoke(deltaTime);
     };
 
     let mvpMatrix;
@@ -514,7 +513,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           smokeFrameBuffer2,
           camera_pos
         );
-      } else {
+      } else if (parameters["render"] === "density") {
         renderDensity(gl, shaders, mvpMatrix, smokeFrameBuffer2, camera_pos);
       }
     };
