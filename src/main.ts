@@ -492,7 +492,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     });
 
     const render = function () {
-      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix); //TODO: This is what's causing the cube not to render
+      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
       if (parameters["render"] === "velocity") {
         renderVelocity(
