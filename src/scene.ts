@@ -35,3 +35,9 @@ export function resetCamera(camera) {
   camera.position.set(5, 5, 5);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
+
+export function createGrid(): THREE.GridHelper {
+  const grid = new THREE.GridHelper(100, 40, 0xdddddd, 0xdddddd);
+  grid.position.set(0, -5.5, 0);
+  return grid;
+}

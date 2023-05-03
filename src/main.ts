@@ -4,7 +4,13 @@ import Stats from "stats.js";
 import { Vector2, Vector3, Matrix4 } from "./lib/math";
 import { loadShaders } from "./shaders";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { getViewMatrix, getMVP, addCube, resetCamera } from "./scene";
+import {
+  getViewMatrix,
+  getMVP,
+  addCube,
+  resetCamera,
+  createGrid,
+} from "./scene";
 
 const SIMULATION_RESOLUTION = new Vector3(50, 50, 50);
 const GRID_SPACING = 0.005;
@@ -94,6 +100,8 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
 
   scene.add(boundary);
 
+  // scene.add(createGrid());
+
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const resizeCanvas = () => {
     canvas.width = window.innerWidth;
@@ -117,21 +125,13 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    20000
   );
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = 10;
   controls.maxDistance = 60;
   controls.target.set(0, 0, 0);
   camera.position.set(100.0, 100.0, 150.0);
-
-  let view_mat = getViewMatrix(camera);
-
-  console.log(view_mat);
-  console.log(camera.matrixWorldInverse);
-
-  let proj_mat = camera.projectionMatrix;
-  console.log(proj_mat);
 
   const shaders = await loadShaders(gl);
 
@@ -485,14 +485,13 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
       addSmoke(deltaTime);
     };
 
-    let mvpMatrix;
-    mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
+    let mvpMatrix = getMVP(camera.matrixWorldInverse, camera.projectionMatrix);
     window.addEventListener("resize", (_) => {
-      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
+      mvpMatrix = getMVP(camera.matrixWorldInverse, camera.projectionMatrix);
     });
 
     const render = function () {
-      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
+      mvpMatrix = getMVP(camera.matrixWorldInverse, camera.projectionMatrix);
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
       if (parameters["render"] === "velocity") {
         renderVelocity(

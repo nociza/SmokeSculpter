@@ -32,13 +32,13 @@ export async function loadShaderFile(shaderPath: string): Promise<string> {
 }
 
 function createShader(gl, source, type) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        throw new Error(gl.getShaderInfoLog(shader) + source);
-    }
-    return shader;
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    throw new Error(gl.getShaderInfoLog(shader) + source);
+  }
+  return shader;
 }
 
 function createProgramFromSource(gl, vertexShaderSource, fragmentShaderSource) {
@@ -296,4 +296,3 @@ export async function loadShaders(
 
   return shaders;
 }
-
