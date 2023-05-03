@@ -495,6 +495,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     });
 
     const render = function () {
+      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix); //TODO: This is what's causing the cube not to render
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
       // renderer.render(scene, camera);
       if (parameters["render"] === "velocity") {
@@ -503,7 +504,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           shaders,
           mvpMatrix,
           velocityFrameBuffer2,
-          camera_pos
+          camera.position
         );
       } else if (parameters["render"] === "temperature") {
         renderTemperature(
@@ -511,10 +512,16 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           shaders,
           mvpMatrix,
           smokeFrameBuffer2,
-          camera_pos
+          camera.position
         );
       } else if (parameters["render"] === "density") {
-        renderDensity(gl, shaders, mvpMatrix, smokeFrameBuffer2, camera_pos);
+        renderDensity(
+          gl,
+          shaders,
+          mvpMatrix,
+          smokeFrameBuffer2,
+          camera.position
+        );
       }
     };
 
@@ -784,8 +791,8 @@ const renderTemperature = function (
   gl,
   shaders,
   mvpMatrix,
-  camera_pos,
-  smokeFrameBuffer
+  smokeFrameBuffer,
+  camera_pos
 ) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(shaders.renderTemperatureProgram);
