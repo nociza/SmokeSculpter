@@ -3,6 +3,7 @@ import * as THREE from "three";
 import Stats from "stats.js";
 import { Vector2, Vector3, Matrix4 } from "./lib/math";
 import { loadShaders } from "./shaders";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const SIMULATION_RESOLUTION = new Vector3(50, 50, 50);
 const GRID_SPACING = 0.005;
@@ -10,12 +11,8 @@ const SIMULATION_SPACE = Vector3.mul(SIMULATION_RESOLUTION, GRID_SPACING);
 const CELL_NUM =
   SIMULATION_RESOLUTION.x * SIMULATION_RESOLUTION.y * SIMULATION_RESOLUTION.z;
 const RENDER_SCALE = Vector3.mul(SIMULATION_SPACE, 75.0 / SIMULATION_SPACE.y);
-const CAMERA_POSITION = new Vector3(100.0, 100.0, 150.0);
 const MODEL_MATRIX = Matrix4.identity;
 const iNV_MODEL_MATRIX = Matrix4.identity;
-const VIEW_MATRIX = Matrix4.inverse(
-  Matrix4.lookAt(CAMERA_POSITION, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
-);
 
 (async function () {
   let mousePosition = new THREE.Vector2(0.0, 0.0);
@@ -72,7 +69,11 @@ const VIEW_MATRIX = Matrix4.inverse(
     }
   }
 
+  const scene = new THREE.Scene();
+
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  canvas.setAttribute("scene", scene.id.toString());
+
   const resizeCanvas = function () {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -82,12 +83,37 @@ const VIEW_MATRIX = Matrix4.inverse(
   });
   resizeCanvas();
 
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+  });
+
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.minDistance = 10;
+  controls.maxDistance = 60;
+  controls.target.set(0, 0, 0);
+  camera.position.set(100.0, 100.0, 150.0);
+
+  const camera_pos = camera.position;
+
+  const view_mat = Matrix4.inverse(
+    Matrix4.lookAt(camera_pos, Vector3.zero, new Vector3(0.0, 1.0, 0.0))
+  );
+
+  const proj_mat = camera.projectionMatrix;
+  console.log(proj_mat);
+
   const gl = canvas.getContext("webgl2");
 
   const shaders = await loadShaders(gl);
 
   gl.getExtension("EXT_color_buffer_float");
-  gl.clearColor(0.7, 0.7, 0.7, 1.0);
+  gl.clearColor(0.7, 0, 0.7, 1.0);
 
   let requestId = null;
   const reset = function () {
@@ -96,7 +122,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       requestId = null;
     }
 
-    let velocityFbObjR = createVelocityFramebuffer(
+    let velocityFrameBuffer = createVelocityFramebuffer(
       gl,
       cellTextureSize,
       cellTextureSize
@@ -107,8 +133,8 @@ const VIEW_MATRIX = Matrix4.inverse(
       cellTextureSize
     );
     const swapVelocityFbObj = function () {
-      const tmp = velocityFbObjR;
-      velocityFbObjR = velocityFbObjW;
+      const tmp = velocityFrameBuffer;
+      velocityFrameBuffer = velocityFbObjW;
       velocityFbObjW = tmp;
     };
 
@@ -188,7 +214,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.addBuoyancyForceUniforms["u_velocityTexture"]
       );
       setUniformTexture(
@@ -226,7 +252,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.advectVelocityUniforms["u_velocityTexture"]
       );
       gl.uniform1f(shaders.advectVelocityUniforms["u_deltaTime"], deltaTime);
@@ -253,7 +279,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.computePressureUniforms["u_velocityTexture"]
       );
       gl.uniform1f(shaders.computePressureUniforms["u_deltaTime"], deltaTime);
@@ -294,7 +320,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.addPressureForceUniforms["u_velocityTexture"]
       );
       setUniformTexture(
@@ -323,7 +349,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.decayVelocityUniforms["u_velocityTexture"]
       );
       gl.uniform1f(shaders.decayVelocityUniforms["u_deltaTime"], deltaTime);
@@ -359,7 +385,7 @@ const VIEW_MATRIX = Matrix4.inverse(
       setUniformTexture(
         gl,
         0,
-        velocityFbObjR.velocityTexture,
+        velocityFrameBuffer.velocityTexture,
         shaders.advectSmokeUniforms["u_velocityTexture"]
       );
       setUniformTexture(
@@ -444,9 +470,9 @@ const VIEW_MATRIX = Matrix4.inverse(
     };
 
     let mvpMatrix;
-    mvpMatrix = getMVP(canvas.width, canvas.height);
+    mvpMatrix = getMVP(canvas.width, canvas.height, view_mat, proj_mat);
     window.addEventListener("resize", (_) => {
-      mvpMatrix = getMVP(canvas.width, canvas.height);
+      mvpMatrix = getMVP(canvas.width, canvas.height, view_mat, proj_mat);
     });
 
     const render = function () {
@@ -474,7 +500,7 @@ const VIEW_MATRIX = Matrix4.inverse(
         );
         gl.uniform3fv(
           shaders.renderVelocityUniforms["u_cameraPosition"],
-          CAMERA_POSITION.toArray()
+          camera_pos.toArray()
         );
         gl.uniform1i(
           shaders.renderVelocityUniforms["u_cellTextureSize"],
@@ -491,7 +517,7 @@ const VIEW_MATRIX = Matrix4.inverse(
         setUniformTexture(
           gl,
           0,
-          velocityFbObjR.velocityTexture,
+          velocityFrameBuffer.velocityTexture,
           shaders.renderVelocityUniforms["u_velocityTexture"]
         );
         gl.uniform1f(
@@ -532,7 +558,7 @@ const VIEW_MATRIX = Matrix4.inverse(
         );
         gl.uniform3fv(
           shaders.renderDensityUniforms["u_cameraPosition"],
-          CAMERA_POSITION.toArray()
+          camera_pos.toArray()
         );
         gl.uniform1i(
           shaders.renderDensityUniforms["u_cellTextureSize"],
@@ -590,7 +616,7 @@ const VIEW_MATRIX = Matrix4.inverse(
         );
         gl.uniform3fv(
           shaders.renderTemperatureUniforms["u_cameraPosition"],
-          CAMERA_POSITION.toArray()
+          camera_pos.toArray()
         );
         gl.uniform1i(
           shaders.renderTemperatureUniforms["u_cellTextureSize"],
@@ -624,6 +650,7 @@ const VIEW_MATRIX = Matrix4.inverse(
         gl.disable(gl.BLEND);
       };
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+      renderer.render(scene, camera);
       if (parameters["render"] === "velocity") {
         renderVelocity();
       } else if (parameters["render"] === "temperature") {
@@ -654,8 +681,9 @@ const VIEW_MATRIX = Matrix4.inverse(
         simulationSeconds += timeStep;
       }
       remaindedSimulationSeconds = nextSimulationSeconds - simulationSeconds;
-
+      controls.update();
       render();
+
       requestId = requestAnimationFrame(loop);
     };
     loop();
@@ -768,8 +796,8 @@ function setUniformTexture(gl, index, texture, location) {
   gl.uniform1i(location, index);
 }
 
-function getMVP(w, h) {
+function getMVP(w, h, view_mat, proj_mat) {
   const projectionMatrix = Matrix4.perspective(w / h, 60.0, 0.01, 1000.0);
-  const mvpMatrix = Matrix4.mul(VIEW_MATRIX, projectionMatrix);
+  const mvpMatrix = Matrix4.mul(view_mat, proj_mat);
   return mvpMatrix;
 }

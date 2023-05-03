@@ -1,4 +1,7 @@
 "use strict";
+
+import * as THREE from "three";
+
 export class Vector2 {
   constructor(x, y) {
     this.x = x;
@@ -94,11 +97,9 @@ export class Vector2 {
   }
 }
 
-export class Vector3 {
+export class Vector3 extends THREE.Vector3 {
   constructor(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    super(x, y, z);
   }
 
   static get zero() {
@@ -205,8 +206,9 @@ export class Vector3 {
   }
 }
 
-export class Matrix4 {
+export class Matrix4 extends THREE.Matrix4 {
   constructor(elements) {
+    super();
     this.elements = new Float32Array(elements);
   }
 
