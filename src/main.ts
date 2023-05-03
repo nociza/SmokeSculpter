@@ -95,9 +95,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   scene.add(boundary);
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-  canvas.setAttribute("scene", scene.id.toString());
-
-  const resizeCanvas = function () {
+  const resizeCanvas = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   };
@@ -106,8 +104,13 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   });
   resizeCanvas();
 
+  const gl = canvas.getContext("webgl2");
+  gl.getExtension("EXT_color_buffer_float");
+  gl.clearColor(0.7, 0, 0.7, 1.0);
+
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
+    context: gl,
   });
 
   const camera = new THREE.PerspectiveCamera(
@@ -122,7 +125,6 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   controls.target.set(0, 0, 0);
   camera.position.set(100.0, 100.0, 150.0);
 
-  let camera_pos = camera.position;
   let view_mat = getViewMatrix(camera);
 
   console.log(view_mat);
@@ -131,12 +133,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   let proj_mat = camera.projectionMatrix;
   console.log(proj_mat);
 
-  const gl = canvas.getContext("webgl2");
-
   const shaders = await loadShaders(gl);
-
-  gl.getExtension("EXT_color_buffer_float");
-  gl.clearColor(0.7, 0, 0.7, 1.0);
 
   let requestId = null;
   const animate = function () {
@@ -497,7 +494,6 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     const render = function () {
       mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix); //TODO: This is what's causing the cube not to render
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
-      // renderer.render(scene, camera);
       if (parameters["render"] === "velocity") {
         renderVelocity(
           gl,
@@ -523,6 +519,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           camera.position
         );
       }
+      renderer.render(scene, camera);
     };
 
     initializeVelocity();
