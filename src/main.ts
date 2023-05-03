@@ -492,9 +492,9 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
     };
 
     let mvpMatrix;
-    mvpMatrix = getMVP(view_mat, proj_mat);
+    mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
     window.addEventListener("resize", (_) => {
-      mvpMatrix = getMVP(view_mat, proj_mat);
+      mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
     });
 
     const render = function () {
@@ -672,7 +672,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
         gl.disable(gl.BLEND);
       };
       gl.viewport(0.0, 0.0, canvas.width, canvas.height);
-      renderer.render(scene, camera);
+      // renderer.render(scene, camera);
       if (parameters["render"] === "velocity") {
         renderVelocity();
       } else if (parameters["render"] === "temperature") {
@@ -689,9 +689,6 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
     let previousRealSeconds = performance.now() * 0.001;
     const loop = function () {
       stats.update();
-      // mvpMatrix = getMVP(getViewMatrix(camera), camera.projectionMatrix);
-      // console.log(mvpMatrix.elements);
-
       const currentRealSeconds = performance.now() * 0.001;
       const nextSimulationSeconds =
         simulationSeconds +
