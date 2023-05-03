@@ -161,7 +161,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       cellTextureSize,
       cellTextureSize
     );
-    const swapVelocityFbObj = function () {
+    const swapVelocityFrameBuffer = function () {
       const tmp = velocityFrameBuffer;
       velocityFrameBuffer = velocityFbObjW;
       velocityFbObjW = tmp;
@@ -204,7 +204,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       gl.useProgram(shaders.initializeVelocityProgram);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapVelocityFbObj();
+      swapVelocityFrameBuffer();
     };
 
     const initializeSmoke = function () {
@@ -263,7 +263,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapVelocityFbObj();
+      swapVelocityFrameBuffer();
     };
 
     const advectVelocity = function (deltaTime) {
@@ -291,7 +291,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapVelocityFbObj();
+      swapVelocityFrameBuffer();
     };
 
     const computePressure = function (deltaTime) {
@@ -369,7 +369,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapVelocityFbObj();
+      swapVelocityFrameBuffer();
     };
 
     const decayVelocity = function (deltaTime) {
@@ -388,7 +388,7 @@ const iNV_MODEL_MATRIX = Matrix4.identity;
       );
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      swapVelocityFbObj();
+      swapVelocityFrameBuffer();
     };
 
     const updateVelocity = function (deltaTime) {
