@@ -23,7 +23,8 @@
   "include": [
     "src/**/*.ts",
     "src/index.html",
-    "src/lib/math.js"
+    "src/lib/math.js",
+    "src/shaders/**/*"
   ],
   "exclude": [
     "node_modules"
