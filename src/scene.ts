@@ -32,7 +32,7 @@ export function addCube(mousePos, scene, camera) {
 }
 
 export function resetCamera(camera) {
-  camera.position.set(5, 5, 5);
+  camera.position.set(100, 100, 150);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
 

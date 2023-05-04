@@ -27,10 +27,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   let mousePressing = false;
   let inSimSpace = false;
   window.addEventListener("mousemove", (event) => {
-    mousePosition = new THREE.Vector2(
-      event.clientX,
-      window.innerHeight - event.clientY
-    );
+    mousePosition = new THREE.Vector2(event.clientX, event.clientY);
   });
   window.addEventListener("mousedown", (_) => {
     mousePressing = true;
@@ -66,7 +63,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     "temperature decay": 0.5,
     "time step": 0.005,
     "time scale": 1.0,
-    render: "density",
+    render: "velocity",
     reset: (_) => animate(),
   };
 
@@ -80,24 +77,21 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   gui.add(parameters, "temperature decay", 0.0, 2.0).step(0.1);
   gui.add(parameters, "time step", 0.0001, 0.01).step(0.0001);
   gui.add(parameters, "time scale", 0.5, 2.0).step(0.001);
-  gui.add(parameters, "render", ["density", "temperature", "velocity"]);
+  gui.add(parameters, "render", ["velocity", "density", "temperature"]);
   gui.add(parameters, "reset");
 
   const scene = new THREE.Scene();
-  const glassMaterial = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    opacity: 0.2,
-    transparent: true,
-  });
-
-  const boundarySize = SIMULATION_SPACE.clone().multiplyScalar(1.01);
+  const glassMaterial = new THREE.MeshStandardMaterial();
+  const boundarySize = SIMULATION_SPACE.clone();
   const boundaryGeometry = new THREE.BoxGeometry(
-    boundarySize.x,
-    boundarySize.y,
-    boundarySize.z
+    boundarySize.x + 0.1,
+    boundarySize.y + 0.1,
+    boundarySize.z + 0.1,
+    2,
+    2,
+    4
   );
   const boundary = new THREE.Mesh(boundaryGeometry, glassMaterial);
-
   scene.add(boundary);
 
   // scene.add(createGrid());
@@ -114,7 +108,6 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
 
   const gl = canvas.getContext("webgl2");
   gl.getExtension("EXT_color_buffer_float");
-  gl.clearColor(0.7, 0, 0.7, 1.0);
 
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -130,7 +123,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = 10;
   controls.maxDistance = 60;
-  controls.target.set(0, 0, 0);
+  controls.target.set(100, 100, 100);
   camera.position.set(100.0, 100.0, 150.0);
 
   const shaders = await loadShaders(gl);
@@ -518,7 +511,6 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           camera.position
         );
       }
-      renderer.render(scene, camera);
     };
 
     initializeVelocity();
@@ -543,7 +535,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
       remaindedSimulationSeconds = nextSimulationSeconds - simulationSeconds;
       controls.update();
       render();
-
+      renderer.render(scene, camera);
       requestId = requestAnimationFrame(loop);
     };
     loop();
