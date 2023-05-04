@@ -63,6 +63,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     "temperature decay": 0.5,
     "time step": 0.005,
     "time scale": 1.0,
+    "background color": "#8e9494",
     render: "velocity",
     reset: (_) => animate(),
   };
@@ -78,6 +79,9 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   gui.add(parameters, "time step", 0.0001, 0.01).step(0.0001);
   gui.add(parameters, "time scale", 0.5, 2.0).step(0.001);
   gui.add(parameters, "render", ["velocity", "density", "temperature"]);
+  gui
+    .addColor(parameters, "background color")
+    .onChange((color) => renderer.setClearColor(color));
   gui.add(parameters, "reset");
 
   const scene = new THREE.Scene();
@@ -87,14 +91,15 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
     boundarySize.x + 0.1,
     boundarySize.y + 0.1,
     boundarySize.z + 0.1,
-    2,
-    2,
+    1,
+    1,
     4
   );
   const boundary = new THREE.Mesh(boundaryGeometry, glassMaterial);
   scene.add(boundary);
-
-  // scene.add(createGrid());
+  scene.background = new THREE.Color(
+    parameters["background color"] as THREE.ColorRepresentation
+  );
 
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const resizeCanvas = () => {
@@ -122,9 +127,9 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   );
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = 10;
-  controls.maxDistance = 60;
-  controls.target.set(100, 100, 100);
-  camera.position.set(100.0, 100.0, 150.0);
+  controls.maxDistance = 100;
+  controls.target.set(100, 60, 100);
+  camera.position.set(150.0, 100.0, 150.0);
 
   const shaders = await loadShaders(gl);
 
@@ -495,6 +500,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           camera.position
         );
       } else if (parameters["render"] === "temperature") {
+        scene.background = new THREE.Color(0xffffff);
         renderTemperature(
           gl,
           shaders,
@@ -503,6 +509,7 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
           camera.position
         );
       } else if (parameters["render"] === "density") {
+        scene.background = new THREE.Color(0xffffff);
         renderDensity(
           gl,
           shaders,
