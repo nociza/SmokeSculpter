@@ -116,17 +116,17 @@ export async function loadShaders(
   );
   const renderVelocityProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/cube.vert"),
     await loadShaderFile("shaders/render_velocity.comp")
   );
   const renderDensityProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/cube.vert"),
     await loadShaderFile("shaders/render_density.comp")
   );
   const renderTemperatureProgram = createProgramFromSource(
     gl,
-    await loadShaderFile("shaders/raytrace.vert"),
+    await loadShaderFile("shaders/cube.vert"),
     await loadShaderFile("shaders/render_temperature.comp")
   );
 
