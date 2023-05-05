@@ -4,11 +4,11 @@ Smoke Sculptor is a real-time 3D smoke simulation written in three.js using the 
 ## Controls
 - `Drag mouse` to rotate camera
 - `Scroll` to zoom in/out
-- `Left click` to add smoke [TODO]
+- `Left click` to add smoke
 - `Right click` to remove smoke [TODO]
 - `Space` to reset camera
-- `N` to toggle normals
-- `R` to reset simulation [TODO]
+- `R` to reset simulation
+- `N` to add Object where the mouse is [TODO]
 
 ## Developement 
 
@@ -16,4 +16,7 @@ Smoke Sculptor is a real-time 3D smoke simulation written in three.js using the 
 
 `npm run dev` to start dev server
 
-`npm run build` to build project for production and export to `docs/dist/` folder for github pages
+`npm run build` to build project for production and export to `docs/demo/` folder for github pages
+
+## Limitations
+- Currently change background color only works in `velocity` mode 
