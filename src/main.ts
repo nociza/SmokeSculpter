@@ -88,9 +88,9 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   const glassMaterial = new THREE.MeshStandardMaterial();
   const boundarySize = SIMULATION_SPACE.clone();
   const boundaryGeometry = new THREE.BoxGeometry(
-    boundarySize.x + 0.1,
-    boundarySize.y + 0.1,
-    boundarySize.z + 0.1,
+    boundarySize.x,
+    boundarySize.y,
+    boundarySize.z,
     1,
     1,
     4
