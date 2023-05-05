@@ -12,7 +12,7 @@ uniform sampler2D u_smokeTexture;
 uniform float u_deltaTime;
 uniform float u_gridSpacing;
 uniform bool u_addHeat;
-uniform vec2 u_mousePosition;
+uniform vec3 u_mousePosition;
 uniform float u_heatSourceRadius;
 uniform float u_heatSourceIntensity;
 uniform float u_densityDecay;
@@ -54,7 +54,7 @@ void main(void) {
   float nextTemperature = temperature;
   vec3 position = convertCellIdToPosition(cellId);
   if (u_addHeat) {
-    vec3 heatCenter = vec3(u_mousePosition.x * u_simulationSpace.x, u_simulationSpace.y * 0.25, u_mousePosition.y * u_simulationSpace.z);
+    vec3 heatCenter = vec3(u_mousePosition.x * u_simulationSpace.x, u_simulationSpace.y * 0.25, u_mousePosition.z * u_simulationSpace.z);
     nextTemperature += smoothstep(u_heatSourceRadius, 0.0, length(position - heatCenter))
       * u_deltaTime * u_heatSourceIntensity;
   }

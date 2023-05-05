@@ -23,17 +23,20 @@ const INV_MODEL_MATRIX = Matrix4.identity;
 const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
 
 (async function () {
-  let mousePosition = new THREE.Vector2(0.0, 0.0);
+  let mousePosition = new THREE.Vector3(0.0, 0.0, 0.0);
+  // let planePos = new THREE.Vector3(0.0, 0.0, 0.0);
   let mousePressing = false;
   let inSimSpace = false;
   window.addEventListener("mousemove", (event) => {
-    mousePosition = new THREE.Vector2(event.clientX, event.clientY);
+    plane.projectPoint(camera.position, mousePosition);
+    mousePosition = new THREE.Vector3(event.clientX, event.clientY, mousePosition.z);
   });
   window.addEventListener("mousedown", (_) => {
     mousePressing = true;
-    if (mousePosition.x < window.innerWidth / 2) {
-      inSimSpace = true;
-    }
+    inSimSpace = true;
+    // if (mousePosition.x < window.innerWidth/4 && mousePosition.y < window.innerHeight) {
+    //   inSimSpace = true;
+    // }
   });
   window.addEventListener("mouseup", (_) => {
     mousePressing = false;
@@ -127,11 +130,18 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
   );
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = 10;
-  controls.maxDistance = 100;
-  controls.target.set(100, 60, 100);
-  camera.position.set(150.0, 100.0, 150.0);
+  controls.maxDistance = 500;
+  controls.target.set(0, 0, 0);
+  camera.position.set(100.0, 100.0, 100.0);
 
   const shaders = await loadShaders(gl);
+
+  // Perpendicular plane
+  let n = new THREE.Vector3(); // normal - for re-use
+  let cpp = new THREE.Vector3(); //coplanar point - for re-use
+  let plane = new THREE.Plane();
+
+  let objPos = new THREE.Vector3(25.0, 25.0, 25.0);
 
   let requestId = null;
   const animate = function () {
@@ -444,9 +454,10 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
       gl.uniform1f(shaders.addSmokeUniforms["u_deltaTime"], deltaTime);
       gl.uniform1f(shaders.addSmokeUniforms["u_gridSpacing"], GRID_SPACING);
       gl.uniform1i(shaders.addSmokeUniforms["u_addHeat"], inSimSpace ? 1 : 0);
-      const heatSourceCenter = new Vector2(
+      const heatSourceCenter = new Vector3(
         mousePosition.x / canvas.width,
-        mousePosition.y / canvas.height
+        mousePosition.y / canvas.height,
+        mousePosition.z
       );
       gl.uniform2fv(
         shaders.addSmokeUniforms["u_mousePosition"],
@@ -541,6 +552,10 @@ const CELL_TEXTURE_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(CELL_NUM)));
       }
       remaindedSimulationSeconds = nextSimulationSeconds - simulationSeconds;
       controls.update();
+      // Adjust perpendicular plane for mousePosition
+      n.subVectors(camera.position, objPos).normalize();
+      cpp.copy(objPos);
+      plane.setFromNormalAndCoplanarPoint(n, cpp);
       render();
       renderer.render(scene, camera);
       requestId = requestAnimationFrame(loop);
