@@ -4,7 +4,7 @@ Smoke Sculptor is a real-time 3D smoke simulation written in three.js using the 
 ## Controls
 - `Left click and drag` to rotate camera
 - `Right click and drag` to move camera horizontally
-- `Left click and hold` to add smoke
+- `Left click and hold` to add smoke (when mouse is above the rendering cube)
 - `Scroll` to zoom in/out
 - `Space` to reset camera
 - `R` to reset simulation
