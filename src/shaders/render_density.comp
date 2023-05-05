@@ -18,6 +18,15 @@ uniform vec3 u_simulationSpace;
 uniform sampler2D u_smokeTexture;
 uniform float u_gridSpacing;
 
+#define RAYMARCH_ITERATIONS 128
+#define SHADOW_ITERATIONS 4
+#define SHADOW_LENGTH u_simulationSpace.y * 1.0
+
+#define LIGHT_DIR normalize(vec3(0.0, 1.0, 0.0))
+#define LIGHT_COLOR vec3(1.0, 1.0, 0.95)
+
+#define ATTENUATION_MULTIPLIER 8.0
+
 struct Ray {
     vec3 origin;
     vec3 dir;
@@ -94,13 +103,6 @@ float sampleDensity(vec3 p) {
     );
 }
 
-#define RAYMARCH_ITERATIONS 128
-#define SHADOW_ITERATIONS 4
-#define SHADOW_LENGTH u_simulationSpace.y * 1.0
-
-#define LIGHT_DIR normalize(vec3(0.0, 1.0, 0.0))
-#define LIGHT_COLOR vec3(1.0, 1.0, 0.95)
-
 vec4 raymarch(vec3 ro, vec3 rd, float tmin, float tmax) {
     float raymarchSize = (length(2.0 * u_scale)) / float(RAYMARCH_ITERATIONS);
     float shadowSize = SHADOW_LENGTH / float(SHADOW_ITERATIONS);
@@ -118,7 +120,7 @@ vec4 raymarch(vec3 ro, vec3 rd, float tmin, float tmax) {
                 shadowPosition += shadowStep;
                 shadowDensity = sampleDensity(shadowPosition);
             }
-            float atten = exp(-shadowDensity * 1.0);
+            float atten = exp(-shadowDensity * ATTENUATION_MULTIPLIER);
             vec3 attenLight = LIGHT_COLOR * atten;
             color += vec3(0.95, 0.98, 1.0) * attenLight * transmittance * density;
 
