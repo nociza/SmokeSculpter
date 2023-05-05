@@ -77,7 +77,7 @@ export async function loadShaders(
   const initializeSmokeProgram = createProgramFromSource(
     gl,
     await loadShaderFile("shaders/fill_viewport.vert"),
-    await loadShaderFile("shaders/initialize_smoke.comp")
+    await loadShaderFile("shaders/initialize_density.comp")
   );
   const addBuoyancyForceProgram = createProgramFromSource(
     gl,
@@ -107,7 +107,7 @@ export async function loadShaders(
   const advectSmokeProgram = createProgramFromSource(
     gl,
     await loadShaderFile("shaders/fill_viewport.vert"),
-    await loadShaderFile("shaders/advect_smoke.frag")
+    await loadShaderFile("shaders/advect_density.frag")
   );
   const addSmokeProgram = createProgramFromSource(
     gl,
