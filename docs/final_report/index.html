@@ -1,0 +1,671 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Final Report</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="a1800553-388c-4229-8635-298df2082154" class="page sans"><header><img class="page-cover-image" src="https://images.unsplash.com/photo-1529641484336-ef35148bab06?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb" style="object-position:center 50%"/><h1 class="page-title">Final Report</h1></header><div class="page-body"><p id="6d7e6323-c0ea-4c9f-84a8-c2d673fd623d" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Alexander Liang, Christina Neumann, Yi Mu, Yueheng Zhang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p><nav id="d086e03e-0ee4-4ef9-8d06-0b0af4eb3fd1" class="block-color-gray table_of_contents"><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#cf48bf0c-44d1-4b4f-9c13-33e7ff089af6">Abstract</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#fcc02cc4-4908-48ed-b480-e652fc7432a1">Technical approach</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#401a041f-420c-47df-bb6c-32cab0f9afbe">Tech Stack</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#ff7e1d9b-d3a5-46fe-8170-d0df4e4633e3">Algorithms</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#ad2ce569-efd8-4cb8-a1e9-d6db47940f13">Shaders</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#d56f8a76-f5d5-4834-96cc-14f7106f08fc">3D Fluid Grid</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#beb80be1-c42b-4ed1-9754-83d3e02ef6f8">Path Tracing</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#8928c2e5-d7fd-4447-93fe-53881ca26c85">Problems Encountered</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#3e7d232d-1fa7-4ef7-b200-52f7a96a82e1">Coordinate Translation </a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#c339766f-d84a-479d-bfe6-32255f4d2bb5">Mouse Position</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#f70822f6-f61b-4294-ad74-91c5966ff546">Lessons Learned</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#5e9b4a8f-d1ff-4f73-9902-484ea51ae27e">Results</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#cdbc1cf8-fc38-4c73-a347-9b835ac7f57d">Gifs</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#5c2beb18-686a-4f19-b36d-ee5b7360709b">Live Demo Website</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#364f4356-a9d4-4783-9deb-385c0affba68">Video Demo</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#2e461a80-2b77-421a-9063-489c05de00f9">References</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#5a3cc199-7830-4207-821f-e8f857b0b189">Papers / Presentations</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#242ff0d6-4f80-491c-9011-54a3e7f3de7a">Tutorials</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#ec95a78f-4a7e-440c-920f-1d72e73db1d5">Github Repos</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#de4c88b1-1671-488a-bece-eecaa39725eb">Contributions from each team member</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#ff5f0cce-d558-4b1e-a5eb-3da08d343eb0"><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Alexander Liang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#70e5db70-feec-4cfe-955a-8e798d94ef47"><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Christina Neumann</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#119c4d8c-0913-4d3f-b967-78fae2f3e7a5"><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Yi Mu</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#2374f162-a368-4832-a35a-a907f56eab2f"><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Yueheng Zhang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></a></div></nav><h1 id="cf48bf0c-44d1-4b4f-9c13-33e7ff089af6" class="">Abstract</h1><p id="d4251391-aa6f-4f15-a7c7-c580896f73b4" class="">In this project, we developed a real-time, 3D smoke simulator that allows the user to create visually appealing smoke with 9 parameters which user can interact with. We utilized the smoke density temperature, velocity to generate a realistic 3D rendering of the smoke. The simulation results are presented in the form of visualizations that showcase the evolution of the smoke over time. The presented approach is expected to be useful in fields such as fire safety engineering, computer graphics, and special effects in film and television. Existing implementations of real-time fluid simulations are all in 2D. But with modern hardware and a staggered grid there’s no reason why we cannot push it to an interactive 3D simulation.</p><h1 id="fcc02cc4-4908-48ed-b480-e652fc7432a1" class="">Technical approach</h1><h2 id="401a041f-420c-47df-bb6c-32cab0f9afbe" class="">Tech Stack</h2><p id="a27b421c-df13-43ad-86aa-a96a69b610ea" class="">In order to better present the interactive 3D experience, we chose to use Threejs and WebGL as our main frameworks, and utilized Typescript and Vite for development and building. We then deployed the page to github pages, hosted a demo here: <a href="https://nociza.github.io/SmokeSculpter/demo/index.html">https://nociza.github.io/SmokeSculpter/demo/index.html</a></p><h2 id="ff7e1d9b-d3a5-46fe-8170-d0df4e4633e3" class="">Algorithms</h2><h3 id="ad2ce569-efd8-4cb8-a1e9-d6db47940f13" class="">Shaders</h3><p id="f5898ebf-25b6-4752-a536-f9a6955f2fa5" class="">We created GLSL Shaders for each of the corresponding components in stable fluids simulation. The shaders are written using WebGL and stored in separate files. Since WebGL only takes in a pure string we utilized the fetch function to open the files and get the string when the user loads the webpage. We started with a 2D version of a combined glsl shader </p><p id="bd3fdc0e-7e8f-485f-8a9b-4136d8b21376" class="">We implemented the following shaders according to the Jos Stam et al. </p><ul id="b8459bed-ae25-4693-8341-4f0a32475179" class="bulleted-list"><li style="list-style-type:disc">buoyancy</li></ul><ul id="310a1e34-e33b-45e8-8a11-a352f716fbec" class="bulleted-list"><li style="list-style-type:disc">density advection</li></ul><ul id="c9f5c640-5fd9-420a-9320-030383ae9ec1" class="bulleted-list"><li style="list-style-type:disc">velocity advection</li></ul><ul id="cecc91b4-aee1-4729-bf7d-8df917af668d" class="bulleted-list"><li style="list-style-type:disc">pressure (divergence) </li></ul><h3 id="d56f8a76-f5d5-4834-96cc-14f7106f08fc" class="">3D Fluid Grid</h3><p id="c609ea10-64f8-4a6d-acc3-3051bd74d6cf" class="">We utilized a staggered grid, which represents scalar quantities (such as pressure) at cell centers and vector quantities (such as velocity) on the boundaries between cells. For a three-dimensional grid, we would have 6 such quantities per cell. We broke the stable fluid calculation into different components and split them up into different shaders to be called separately if needed. </p><figure id="2cf40742-2cea-4724-b381-965f8f12a3f5" class="image"><a href="Final%20Report%20a1800553388c42298635298df2082154/Untitled.png"><img style="width:384px" src="Final%20Report%20a1800553388c42298635298df2082154/Untitled.png"/></a></figure><p id="66cbcef0-e807-4b68-a52e-2535b7197192" class="">One advantage of using staggered grids is that divergence (2D example above) can be calculated exactly. In our case we utilized a combined “pressure” shader that made sure that the grids are divergence-free. </p><h3 id="beb80be1-c42b-4ed1-9754-83d3e02ef6f8" class="">Path Tracing</h3><p id="0258e930-d9d4-4fcb-8d3d-06a483f8f606" class="">To make the smoke look volumetric and more realistic in 3D we added zero-bounce path tracing when projecting the 3D simulated material to the 2D cube-faces. We utilized ray-marching with identical steps to simplify the integration. (Wald 2004)</p><h2 id="8928c2e5-d7fd-4447-93fe-53881ca26c85" class="">Problems Encountered</h2><h3 id="3e7d232d-1fa7-4ef7-b200-52f7a96a82e1" class="">Coordinate Translation </h3><p id="402f6108-ad61-4cfa-bf30-ac344df57e65" class="">We encountered a unique problem when trying to create the “simulation cube” at the middle of the scene: the image on the six sides of the cube needs to be there correct regardless of where the camera is. But we would also want the shaders to handle ray tracing and therefore return a 2-dimensional coordinate after calculation. We therefore implemented three different coordinate systems: </p><ul id="7d5b84c5-db22-4f61-af80-7a25716fd003" class="bulleted-list"><li style="list-style-type:disc">The 3D simulation space, used by the shaders to index cells and calculate smoke attributes</li></ul><ul id="6d023c37-a34f-4d74-9f71-b00c4d8508b2" class="bulleted-list"><li style="list-style-type:disc">The 2D cube-face space, used as a “screen” wrapped around the six sides of the cube</li></ul><ul id="4ebd48e7-fb22-4753-8b12-2185bef8ce10" class="bulleted-list"><li style="list-style-type:disc">The 2D screen space, the actual canvas that’s shown to us, this is where the camera translations are</li></ul><h3 id="c339766f-d84a-479d-bfe6-32255f4d2bb5" class="">Mouse Position</h3><p id="79f2119d-59d4-4837-b862-7c18e9ce3542" class="">Another interesting problem is how to translate a 2D click onto a 3D scene and make the click intuitive to the user. We implemented an elegant solution that generates a plane that goes through <code>(0, 0, 0)</code> and that’s perpendicular to the camera direction. The user would feel like they are actually clicking on a plane and by moving the camera the user would be able to reach any point in the 3D space. </p><h2 id="f70822f6-f61b-4294-ad74-91c5966ff546" class="">Lessons Learned</h2><p id="b3bebc96-4fa2-4717-b052-ee13478d4ed9" class="">Simulating smoke in 3D is a difficult task. While we found many resources on simulating smoke in 2D, they did not translate well into 3D and were not very useful. The representation of the grid was also challenging due to the numerous moving parts that had to be calculated, making it computationally expensive. Although we initially aimed to include object collision, the resources we started with required us to rework too much of the code in a short amount of time. As a result, we did not achieve the desired outcome.</p><p id="7642a3e5-2ba9-48a4-bba2-38dbc8219355" class="">Despite the challenges, we gained valuable insights into how smoke simulation works, the interaction between Javascript and glsl shaders, and the power of Three.js in making the rendering and interaction with the simulation easier. We discovered that delegating resource-intensive calculations to the GPU yields much faster overall results. (Although we did not benchmark it, we initially wrote 3D to 2D projection translation functions in Javascript and found it to be very slow.)</p><h1 id="5e9b4a8f-d1ff-4f73-9902-484ea51ae27e" class="">Results</h1><h3 id="cdbc1cf8-fc38-4c73-a347-9b835ac7f57d" class="">Gifs</h3><div id="5efc8c92-844d-43fc-b360-92b0a231b8c6" class="column-list"><div id="601a6243-b8ce-42f9-8b03-4d606307838d" style="width:50%" class="column"><figure id="bfcfd5b5-c0db-4aa0-80b1-56c1adce9479" class="image"><a href="Final%20Report%20a1800553388c42298635298df2082154/density.gif"><img style="width:1148px" src="Final%20Report%20a1800553388c42298635298df2082154/density.gif"/></a><figcaption>Density Rendering</figcaption></figure><p id="ce27d50b-64e8-464a-ab71-b308eb0bfc13" class="">In this rendering we only show smoke particle density as the simulation evolves. The denser the smoke particles the darker the color. </p></div><div id="ddb72652-d410-4e6d-94d5-f1f8967909f6" style="width:50%" class="column"><figure id="d608c5a1-f0b9-4657-ada3-096d1002da57" class="image"><a href="Final%20Report%20a1800553388c42298635298df2082154/velocity.gif"><img style="width:1148px" src="Final%20Report%20a1800553388c42298635298df2082154/velocity.gif"/></a><figcaption>Velocity Rendering</figcaption></figure><p id="b868fb64-f855-48b2-a81d-56d7cf0b678f" class="">This shows a colorful 3D vector field of the velocity value of each cell. The cells with low particles are still colored that’s why the grid is more pronounced</p></div></div><h3 id="5c2beb18-686a-4f19-b36d-ee5b7360709b" class="">Live Demo Website</h3><p id="c09b92f3-f989-4fe9-99a8-e97d6d3e16f3" class=""><a href="https://nociza.github.io/SmokeSculpter/demo/index.html">https://nociza.github.io/SmokeSculpter/demo/index.html</a></p><h3 id="364f4356-a9d4-4783-9deb-385c0affba68" class="">Video Demo</h3><figure id="ac885743-add8-4aea-b2ff-f6aeb627c9cb"><div class="source"><iframe width="100%" height="345" src="https://www.youtube.com/embed/kvi_u-q06Ss" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></figure><h1 id="2e461a80-2b77-421a-9063-489c05de00f9" class="">References</h1><h3 id="5a3cc199-7830-4207-821f-e8f857b0b189" class="">Papers / Presentations</h3><p id="ece4a744-7577-44ba-a631-1c2b6411c8c2" class=""><a href="https://web.stanford.edu/class/cs237d/smoke.pdf">https://web.stanford.edu/class/cs237d/smoke.pdf</a></p><p id="99fee948-5d7f-4e66-a03a-b739d4e37628" class=""><a href="https://cs184.eecs.berkeley.edu/sp23/lecture/20-9/fluid-simulation">https://cs184.eecs.berkeley.edu/sp23/lecture/20-9/fluid-simulation</a></p><p id="197f613b-0461-4588-bd53-e30a31ca290b" class=""><a href="https://developer.nvidia.com/sites/all/modules/custom/gpugems/books/GPUGems/gpugems_ch38.html">https://developer.nvidia.com/sites/all/modules/custom/gpugems/books/GPUGems/gpugems_ch38.html</a></p><figure id="ce07c26a-b0cf-4d14-8738-7b6f3b147b78"><a href="http://graphics.cs.cmu.edu/nsp/course/15-464/Fall09/papers/StamFluidforGames.pdf" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title"></div></div><div class="bookmark-href">http://graphics.cs.cmu.edu/nsp/course/15-464/Fall09/papers/StamFluidforGames.pdf</div></div></a></figure><h3 id="242ff0d6-4f80-491c-9011-54a3e7f3de7a" class="">Tutorials</h3><p id="087c4416-f4e5-435f-ae15-91fbe9bf4ca4" class=""><a href="https://www.youtube.com/watch?v=iKAVRgIrUOU">https://www.youtube.com/watch?v=iKAVRgIrUOU</a></p><figure id="22d376b3-065e-4fd8-92af-01d232a0835f"><a href="https://gamedevelopment.tutsplus.com/tutorials/how-to-write-a-smoke-shader--cms-25587" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">How to Write a Smoke Shader</div><div class="bookmark-description">There&#x27;s always been a certain air of mystery around smoke. It&#x27;s aesthetically pleasing to watch and elusive to model. Like many physical phenomena, it&#x27;s a chaotic system, which makes it very...</div></div><div class="bookmark-href"><img src="https://static.tutsplus.com/packs/media/images/apple-touch-icon-99da4cfc1b6e3d94174906836f4f9e6b.png" class="icon bookmark-icon"/>https://gamedevelopment.tutsplus.com/tutorials/how-to-write-a-smoke-shader--cms-25587</div></div><img src="https://cms-assets.tutsplus.com/uploads/users/728/posts/25587/preview_image/Preview.png" class="bookmark-image"/></a></figure><h3 id="ec95a78f-4a7e-440c-920f-1d72e73db1d5" class="">Github Repos</h3><p id="d86a0bb9-16b9-43ba-a8c9-78f194b347d9" class=""><a href="http://users.csc.calpoly.edu/~zwood/teaching/csc471/finalF20/waidhofer/index.html">http://users.csc.calpoly.edu/~zwood/teaching/csc471/finalF20/waidhofer/index.html</a></p><figure id="cd40771d-c783-4fb4-95d8-b1d843a2ca42"><div class="source">https://github.com/StarsX/FluidX12</div></figure><figure id="fecc3d22-75eb-4d9d-bed2-fc025b393275"><a href="https://github.com/dataarts/dat.gui" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">GitHub - dataarts/dat.gui: Lightweight controller library for JavaScript.</div><div class="bookmark-description">Lightweight controller library for JavaScript. Contribute to dataarts/dat.gui development by creating an account on GitHub.</div></div><div class="bookmark-href"><img src="https://github.com/fluidicon.png" class="icon bookmark-icon"/>https://github.com/dataarts/dat.gui</div></div><img src="https://opengraph.githubassets.com/81249f25b7f7a5a0beeff382848081f730db245e2a18170a60d3336747ddc74f/dataarts/dat.gui" class="bookmark-image"/></a></figure><figure id="ef41bfe8-05f0-4454-910a-f6631169cfc9"><a href="https://github.com/aadebdeb/WebGL_SmokeSimulation" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">GitHub - aadebdeb/WebGL_SmokeSimulation: GPU Smoke Simulation in WebGL</div><div class="bookmark-description">GPU Smoke Simulation in WebGL. Contribute to aadebdeb/WebGL_SmokeSimulation development by creating an account on GitHub.</div></div><div class="bookmark-href"><img src="https://github.com/fluidicon.png" class="icon bookmark-icon"/>https://github.com/aadebdeb/WebGL_SmokeSimulation</div></div><img src="https://opengraph.githubassets.com/13a5e6a47ced3ed216a8819737ae90209c53c2da36c1e3bd5e0f44cc3c97facc/aadebdeb/WebGL_SmokeSimulation" class="bookmark-image"/></a></figure><p id="6cae3369-3f4d-4907-ac0d-52fc6736a789" class="">
+</p><h1 id="de4c88b1-1671-488a-bece-eecaa39725eb" class="">Contributions from each team member</h1><h3 id="ff5f0cce-d558-4b1e-a5eb-3da08d343eb0" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Alexander Liang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></h3><p id="95166f3c-eef0-4ded-ae81-6d761f5bf06c" class="">Helped write presentations and worked on collisions, smoke generation, and the GUI. Helped with initial prototyping and object generation. </p><h3 id="70e5db70-feec-4cfe-955a-8e798d94ef47" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Christina Neumann</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></h3><p id="57638907-4501-42a6-a09b-fb8d2c3236c0" class="">Co-wrote project proposal and other reports, corresponded with course staff, helped organize resources and team meetings. Set up three.js objects and the perpendicular plane and helped debugging process. </p><h3 id="119c4d8c-0913-4d3f-b967-78fae2f3e7a5" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Yi Mu</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></h3><p id="22c813f2-55e0-441f-b5c4-23a2110034be" class="">Helping Yueheng Zhang creating the general structure of the project, co-wrote project proposal and both reports and ppt.</p><h3 id="2374f162-a368-4832-a35a-a907f56eab2f" class=""><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong>Yueheng Zhang</strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></h3><p id="53498153-1e43-4d32-8221-ea0d703de795" class="">Yueheng is mostly in charge of creating the general structure of the project and rewriting 2D rendering logic as well as glsl shaders into 3D. He also worked on coordinate translation and camera movement. </p><p id="3e9cc0f9-66bc-49f1-aec5-e6d29a238c5e" class="">
+</p></div></article></body></html>
